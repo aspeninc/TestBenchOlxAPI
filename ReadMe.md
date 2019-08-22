@@ -7,6 +7,19 @@ test OlrxAPI function calls.
 This file contains a summary of what you will find in each of the files that
 make up the application.
 
+/////////////////////////////////////////////////////////////////////////////
+
+ASPEN OlrxAPI files
+
+include\OlrxAPI.h
+    Header file for OlrxAPI functions and constants definitions
+
+bin\OlrxAPI.lib
+    Object file library
+
+/////////////////////////////////////////////////////////////////////////////
+VS 2013 application wizard generated files:
+
 TestBenchOlrxAPI.vcxproj
     This is the main project file for VC++ projects generated using an application wizard.
     It contains information about the version of Visual C++ that generated the file, and
@@ -46,6 +59,16 @@ res\Unittest.rc2
 
 /////////////////////////////////////////////////////////////////////////////
 
+ASPEN OlrxAPI files
+
+include\OlrxAPI.h
+    Header file for OlrxAPI functions and constants definitions
+
+bin\OlrxAPI.lib
+    Object file library
+
+/////////////////////////////////////////////////////////////////////////////
+
 For the main frame window:
     The project includes a standard MFC interface.
 
@@ -74,7 +97,7 @@ UnittestView.h, UnittestView.cpp - the view of the document
 
 /////////////////////////////////////////////////////////////////////////////
 
-Other standard files:
+Other files:
 
 StdAfx.h, StdAfx.cpp
     These files are used to build a precompiled header (PCH) file
@@ -91,13 +114,9 @@ Unittest.manifest
 	from the application. The Application manifest  maybe included for redistribution
 	as an external .manifest file that is installed in the same folder as the application
 	executable or it may be included in the executable in the form of a resource.
-/////////////////////////////////////////////////////////////////////////////
-
-ASPEN custom files
 
 TTYWindow.cpp TTYWindow.h
     VS c++ 2013 wizard dialog box for displaying text output.
-
 
 /////////////////////////////////////////////////////////////////////////////
 Other notes:
