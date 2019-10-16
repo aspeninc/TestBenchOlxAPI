@@ -710,6 +710,7 @@ const char* __stdcall OlrxAPIGetObjMemo( int nDeviceHnd );
 const char* __stdcall OlrxAPIGetObjTags( int nDeviceHnd );
 const char* __stdcall OlrxAPIGetOlrFileName();
 int __stdcall OlrxAPIGetPSCVoltage( int nDeviceHnd, double *dOut1, double *dOut2, int nStyle );
+int __stdcall OlrxAPIGetRelay( int nHndRlyGroup, int* nHndRelay );
 int __stdcall OlrxAPIGetRelayTime( int nRelayHnd, double dFactor, double *pTime, char* szDevice, int nTripOnly );
 int __stdcall OlrxAPIGetSCCurrent( int nDeviceHnd, double *dOut1, double *dOut2, int nStyle );
 int __stdcall OlrxAPIGetSCVoltage( int nDeviceHnd, double *dOut1, double *dOut2, int nStyle );
