@@ -9,7 +9,7 @@
 // SHARED_HANDLERS can be defined in an ATL project implementing preview, thumbnail
 // and search filter handlers and allows sharing of document code with that project.
 #ifndef SHARED_HANDLERS
-#include "TestBenchOlrxAPI.h"
+#include "TestBenchOlxAPI.h"
 #endif
 
 #include "UnittestDoc.h"
@@ -17,7 +17,8 @@
 #include <AtlBase.h>
 #include <AtlConv.h>
 #include "TTYWindow.h"
-#include "olrxapi.h"
+#include "olxapi.h"
+#include "Run1LPFCmd.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -31,6 +32,10 @@ BEGIN_MESSAGE_MAP(CUnittestDoc, CDocument)
    ON_UPDATE_COMMAND_UI( ID_TEST_DATAACCESS, &CUnittestDoc::OnUpdateTestDataAccess )
    ON_COMMAND( ID_TEST_FAULTSIMULATION, &CUnittestDoc::OnTestFaultSimulation )
    ON_UPDATE_COMMAND_UI( ID_TEST_FAULTSIMULATION, &CUnittestDoc::OnUpdateTestFaultSimulation )
+   ON_UPDATE_COMMAND_UI( ID_TEST_DIFFANDMERGE, &CUnittestDoc::OnUpdateTestDiffandMerge )
+   ON_COMMAND( ID_TEST_DIFFANDMERGE, &CUnittestDoc::OnTestDiffandMerge )
+   ON_COMMAND( ID_TEST_RUN1LPFCMD, &CUnittestDoc::OnTestRun1lPFCmd )
+   ON_UPDATE_COMMAND_UI( ID_TEST_RUN1LPFCMD, &CUnittestDoc::OnUpdateTestRun1LPFCmd )
 END_MESSAGE_MAP()
 
 
@@ -146,9 +151,9 @@ void CUnittestDoc::Dump(CDumpContext& dc) const
 //
 void ShowTTY( CString sText, BOOL bAppend );
 BOOL CUnittestDoc::OnOpenDocument( LPCTSTR lpszPathName ) {
-   if ( OLRXAPI_OK != OlrxAPILoadDataFile( (char*)lpszPathName, FALSE ) ) {
-      if ( OLRXAPI_OK != OlrxAPILoadDataFile( (char*)lpszPathName, TRUE ) ) {
-         AfxMessageBox( OlrxAPIErrorString() );
+   if ( OLRXAPI_OK != OlxAPILoadDataFile( (char*)lpszPathName, FALSE ) ) {
+      if ( OLRXAPI_OK != OlxAPILoadDataFile( (char*)lpszPathName, TRUE ) ) {
+         AfxMessageBox( OlxAPIErrorString() );
          m_nFileOpen = 0;
          return FALSE;
       }
@@ -173,19 +178,19 @@ void CUnittestDoc::OnTestDataAccess() {
    char szName[100];
    CString sT, sTTYText;
 
-   if ( OLRXAPI_OK != OlrxAPIGetData( HND_SYS, SY_nNObus, &NObus ) ) {
-      AfxMessageBox( OlrxAPIErrorString() );
+   if ( OLRXAPI_OK != OlxAPIGetData( HND_SYS, SY_nNObus, &NObus ) ) {
+      AfxMessageBox( OlxAPIErrorString() );
       return;
    }
-   sTTYText.Format( "OLR Network: %s\r\n\r\nNObus = %d", OlrxAPIGetOlrFileName(), NObus );
+   sTTYText.Format( "OLR Network: %s\r\n\r\nNObus = %d", OlxAPIGetOlrFileName(), NObus );
    nHnd = 0;
-   while ( OLRXAPI_OK == OlrxAPIGetEquipment( TC_BUS, &nHnd ) ) {
-      if ( OLRXAPI_OK != OlrxAPIGetData( nHnd, BUS_sName, szName ) ) {
-         AfxMessageBox( OlrxAPIErrorString() );
+   while ( OLRXAPI_OK == OlxAPIGetEquipment( TC_BUS, &nHnd ) ) {
+      if ( OLRXAPI_OK != OlxAPIGetData( nHnd, BUS_sName, szName ) ) {
+         AfxMessageBox( OlxAPIErrorString() );
          return;
       }
-      if ( OLRXAPI_OK != OlrxAPIGetData( nHnd, BUS_dKVnominal, &dKV ) ) {
-         AfxMessageBox( OlrxAPIErrorString() );
+      if ( OLRXAPI_OK != OlxAPIGetData( nHnd, BUS_dKVnominal, &dKV ) ) {
+         AfxMessageBox( OlxAPIErrorString() );
          return;
       }
       sT.Format( "%s %gkV", szName, dKV );
@@ -193,6 +198,15 @@ void CUnittestDoc::OnTestDataAccess() {
    }
 //   ttyDlg.DoModal();
    ShowTTY( sTTYText, FALSE );
+}
+/////////////////////////////////////////////////////////////////////////////////////////
+void CUnittestDoc::OnUpdateTestDiffandMerge( CCmdUI *pCmdUI ) {
+   pCmdUI->Enable( m_nFileOpen == 0 ? TRUE : FALSE );  // No open file 
+}
+
+void CUnittestDoc::OnTestDiffandMerge() {
+   void TestDiffNMerge();
+   TestDiffNMerge();
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -223,38 +237,38 @@ void CUnittestDoc::OnTestFaultSimulation() {
 
    nBusHnd = 0;
    do {
-      if ( OLRXAPI_OK != OlrxAPIGetEquipment(TC_BUS, &nBusHnd) ) {
-         AfxMessageBox( OlrxAPIErrorString() );
+      if ( OLRXAPI_OK != OlxAPIGetEquipment(TC_BUS, &nBusHnd) ) {
+         AfxMessageBox( OlxAPIErrorString() );
          return;
       }
-      if ( OLRXAPI_FAILED == OlrxAPIDoFault( nBusHnd, nFltConn, dFltOpt, nOutageOpt, nOutageLst, dFltR, dFltX, nClearPrev ) ) {
-         AfxMessageBox( OlrxAPIErrorString() );
+      if ( OLRXAPI_FAILED == OlxAPIDoFault( nBusHnd, nFltConn, dFltOpt, nOutageOpt, nOutageLst, dFltR, dFltX, nClearPrev ) ) {
+         AfxMessageBox( OlxAPIErrorString() );
          return;
       }
-      if ( OLRXAPI_FAILED == OlrxAPIPickFault( SF_FIRST, 1 ) ) {
-         AfxMessageBox( OlrxAPIErrorString() );
+      if ( OLRXAPI_FAILED == OlxAPIPickFault( SF_FIRST, 1 ) ) {
+         AfxMessageBox( OlxAPIErrorString() );
          return;
       }
-      strTTY = OlrxAPIFaultDescription( 0 );
+      strTTY = OlxAPIFaultDescription( 0 );
       nBrHnd = 0;
-      while ( OLRXAPI_OK == OlrxAPIGetBusEquipment( nBusHnd, TC_BRANCH, &nBrHnd ) ) {
-         if ( OLRXAPI_FAILED == OlrxAPIGetSCVoltage( nBrHnd, vdOut1, vdOut2, 4 ) ) {
-            AfxMessageBox( OlrxAPIErrorString() );
+      while ( OLRXAPI_OK == OlxAPIGetBusEquipment( nBusHnd, TC_BRANCH, &nBrHnd ) ) {
+         if ( OLRXAPI_FAILED == OlxAPIGetSCVoltage( nBrHnd, vdOut1, vdOut2, 4 ) ) {
+            AfxMessageBox( OlxAPIErrorString() );
             return;
          }
-         if ( OLRXAPI_FAILED == OlrxAPIGetSCCurrent( nBrHnd, vdIOut1, vdIOut2, 4 ) ) {
-            AfxMessageBox( OlrxAPIErrorString() );
+         if ( OLRXAPI_FAILED == OlxAPIGetSCCurrent( nBrHnd, vdIOut1, vdIOut2, 4 ) ) {
+            AfxMessageBox( OlxAPIErrorString() );
             return;
          }
-         if ( OLRXAPI_FAILED == OlrxAPIGetData( nBrHnd, BR_nBus2Hnd, &nBus2Hnd ) ) {
-            AfxMessageBox( OlrxAPIErrorString() );
+         if ( OLRXAPI_FAILED == OlxAPIGetData( nBrHnd, BR_nBus2Hnd, &nBus2Hnd ) ) {
+            AfxMessageBox( OlxAPIErrorString() );
             return;
          }
          strText.Format( "%s Va=%.1f@%.1f Vb=%.1f@%.1f Vc=%.1f@%.1f\r\n"
                          "%s Va=%.1f@%.1f Vb=%.1f@%.1f Vc=%.1f@%.1f\r\n"
                          "Ia=%.1f@%.1f Ib=%.1f@%.1f Ic=%.1f@%.1f",
-                         OlrxAPIFullBusName( nBusHnd ), vdOut1[0], vdOut2[0], vdOut1[1], vdOut2[1], vdOut1[2], vdOut2[2],
-                         OlrxAPIFullBusName( nBus2Hnd ), vdOut1[3], vdOut2[3], vdOut1[4], vdOut2[4], vdOut1[5], vdOut2[5],
+                         OlxAPIFullBusName( nBusHnd ), vdOut1[0], vdOut2[0], vdOut1[1], vdOut2[1], vdOut1[2], vdOut2[2],
+                         OlxAPIFullBusName( nBus2Hnd ), vdOut1[3], vdOut2[3], vdOut1[4], vdOut2[4], vdOut1[5], vdOut2[5],
                          vdIOut1[0], vdIOut2[0], vdIOut1[1], vdIOut2[1], vdIOut1[2], vdIOut2[2] );
          strTTY += "\r\n" + strText;
       }
@@ -263,9 +277,26 @@ void CUnittestDoc::OnTestFaultSimulation() {
          break;
    } while ( nBusHnd > 0 );
 }
-
 //
 /////////////////////////////////////////////////////////////////////////////////////////
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//
+void CUnittestDoc::OnTestRun1lPFCmd() {
+   CRun1LPFCmd dlg;
 
+   if ( IDOK != dlg.DoModal() )
+      return;
+   if ( OLRXAPI_FAILED == OlxAPIRun1LPFCommand( dlg.m_sInput.GetBuffer() ) ) {
+      AfxMessageBox( OlxAPIErrorString() );
+      return;
+   } else {
+      AfxMessageBox( "Command excuted successfully." );
+   }
+}
 
+void CUnittestDoc::OnUpdateTestRun1LPFCmd( CCmdUI *pCmdUI ) {
+   pCmdUI->Enable( TRUE );
+}
+//
+/////////////////////////////////////////////////////////////////////////////////////////

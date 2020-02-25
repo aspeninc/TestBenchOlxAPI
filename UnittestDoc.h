@@ -53,4 +53,8 @@ public:
    afx_msg void OnUpdateTestDataAccess( CCmdUI *pCmdUI );
    afx_msg void OnTestFaultSimulation();
    afx_msg void OnUpdateTestFaultSimulation( CCmdUI *pCmdUI );
+   afx_msg void OnUpdateTestDiffandMerge( CCmdUI *pCmdUI );
+   afx_msg void OnTestDiffandMerge();
+   afx_msg void OnTestRun1lPFCmd();
+   afx_msg void OnUpdateTestRun1LPFCmd( CCmdUI *pCmdUI );
 };

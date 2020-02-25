@@ -1,5 +1,5 @@
 ================================================================================
-    Test Bench for OLRXAPI
+    Test Bench for OLXAPI Module
 ===============================================================================
 This Visual Studio 2013 c++ application wizard project contains code to 
 test OlrxAPI function calls.
@@ -9,12 +9,12 @@ make up the application.
 
 /////////////////////////////////////////////////////////////////////////////
 
-ASPEN OlrxAPI files
+ASPEN OlxAPI files
 
-include\OlrxAPI.h
+include\OlxAPI.h
     Header file for OlrxAPI functions and constants definitions
 
-bin\OlrxAPI.lib
+bin\OlxAPI.lib
     Object file library
 
 /////////////////////////////////////////////////////////////////////////////
@@ -56,16 +56,6 @@ res\Unittest.rc2
     This file contains resources that are not edited by Microsoft
     Visual C++. You should place all resources not editable by
     the resource editor in this file.
-
-/////////////////////////////////////////////////////////////////////////////
-
-ASPEN OlrxAPI files
-
-include\OlrxAPI.h
-    Header file for OlrxAPI functions and constants definitions
-
-bin\OlrxAPI.lib
-    Object file library
 
 /////////////////////////////////////////////////////////////////////////////
 

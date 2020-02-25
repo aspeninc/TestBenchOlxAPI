@@ -8,11 +8,11 @@
 #include "stdafx.h"
 #include "afxwinappex.h"
 #include "afxdialogex.h"
-#include "TestBenchOlrxAPI.h"
+#include "TestBenchOlxAPI.h"
 #include "MainFrm.h"
 #include "UnittestDoc.h"
 #include "UnittestView.h"
-#include "olrxapi.h"
+#include "olxapi.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -116,9 +116,9 @@ BOOL CUnittestApp::InitInstance()
 	m_pMainWnd->ShowWindow(SW_SHOW);
 	m_pMainWnd->UpdateWindow();
 
-   CString sMsg = OlrxAPIErrorString();
+   CString sMsg = OlxAPIErrorString();
    if ( sMsg == "No Error" ) {
-      OlrxAPIVersionInfo( sMsg.GetBufferSetLength( 64 ) );
+      OlxAPIVersionInfo( sMsg.GetBufferSetLength( 512 ) );
       sMsg.ReleaseBuffer();
    }
    AfxMessageBox( sMsg );
