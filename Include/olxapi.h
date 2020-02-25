@@ -1,17 +1,24 @@
-/* OlrxAPI.h : C header file for the OlrxAPI.DLL
-   Copyright (c) 1987-2019 Advanced Systems for Power Engineering, Inc. (ASPEN).
+/* OlxAPI.h : C header file for the OlxAPI.DLL
+   Copyright (c) 1987-2020 Advanced Systems for Power Engineering, Inc. (ASPEN).
    All rights reserved. 
 */
 
 #pragma once
 
+// To be shipped with OneLiner V14 only
 #define OLRXAPI_FAILED      0
 #define OLRXAPI_OK          1
 #define OLRXAPI_FAILURE 0
-
 #define OLRXAPI_STATE_UNINITIALIZED       0
 #define OLRXAPI_STATE_INITIALIZED         1
 #define OLRXAPI_STATE_SCRIPTINITIALIZED   2
+///
+#define OLXAPI_FAILED      0
+#define OLXAPI_OK          1
+#define OLXAPI_FAILURE 0
+#define OLXAPI_STATE_UNINITIALIZED       0
+#define OLXAPI_STATE_INITIALIZED         1
+#define OLXAPI_STATE_SCRIPTINITIALIZED   2
 
 // Object type codes
 #define TC_NOTHING 0
@@ -667,7 +674,7 @@
 #define SF_FIRST 1
 #define SF_PREV -4
 
-// API functions declarations
+// API functions declarations; To be shipped with OneLiner V14 only
 int __stdcall OlrxAPIBoundaryEquivalent( char *szEquFileName, int *nBusList, double *dFltOpt );
 int __stdcall OlrxAPIComputeRelayTime( int nRelayHnd,
    double *dCurMag, double *dCurAng,   // 3 phases plus two neutral currents
@@ -705,6 +712,7 @@ int __stdcall OlrxAPIGetBusEquipment( int nBusHnd, int nType, int* pDeviceHnd );
 int __stdcall OlrxAPIGetData( int nDeviceHnd, int nParam, void *pOutput );
 int __stdcall OlrxAPIGetEquipment( int nType, int *pDeviceHnd );
 int __stdcall OlrxAPIGetLogicScheme( int nRlyGrHnd, long * pSchemeHnd );
+int __stdcall OlrxAPIGetRelay( int nRlyGrHnd, int *pRelayHnd );
 const char* __stdcall OlrxAPIGetObjJournalRecord( int nDeviceHnd );
 const char* __stdcall OlrxAPIGetObjMemo( int nDeviceHnd );
 const char* __stdcall OlrxAPIGetObjTags( int nDeviceHnd );
@@ -732,5 +740,67 @@ const char* __stdcall OlrxAPISetObjMemo( int nDeviceHnd, char *szT );
 const char* __stdcall OlrxAPISetObjTags( int nDeviceHnd, char *szT );
 int __stdcall OlrxAPIVersionInfo( char *szBuf );
 
-
-
+// API functions declarations;
+int __stdcall OlxAPIBoundaryEquivalent( char *szEquFileName, int *nBusList, double *dFltOpt );
+int __stdcall OlxAPIComputeRelayTime( int nRelayHnd,
+   double *dCurMag, double *dCurAng,   // 3 phases plus two neutral currents
+   double *dVMag, double *dVAng,       // 3 phases voltages
+   double dVpreMag, double dVpreAng,
+   double *pTime, char *szDevice );
+int __stdcall OlxAPIDeleteEquipment( int nDeviceHnd );
+int __stdcall OlxAPIDoBreakerRating(
+   int* nScope,         //[1]: 0-IEEE;1-IEC
+                        //[2]: 0-All;1-Area;2-Zone;3-Selected
+                        //[3]: Area or zone number
+                        //...: or list of bus hnd terminated with -1
+   double dThreshold,   // Rating threshold
+   double dOutputOpt,   // 0.0- all; 1.0-Overduty only; else- screening threshold
+   int nOptionalReport, // Bit1-Detailed sim result; Bit2-Name plate data; 
+                        // Bit3-Conn equipment list
+   char* szReportTXT,
+   char* szReportCSV,
+   char* szConfigFile );
+int __stdcall OlxAPIDoFault( int nDevHnd, int *nFltConn,
+   double *dFltOpt, int *nOutageOpt, int *nOutageLst,
+   double dFltR, double dFltX, int nFlag );
+int __stdcall OlxAPIDoSteppedEvent( int nDevHnd, double *dFltOpt, int *nDevOpt, long nTiers );
+int __stdcall OlxAPIEquipmentType( int nDevHnd );
+const char* __stdcall OlxAPIErrorString();
+const char* __stdcall OlxAPIFaultDescription( int nFltIdx );
+int __stdcall OlxAPIFindBusByName( const char* pszBusName, double dKV, int* pDeviceHnd );
+int __stdcall OlxAPIFindBusByName( const char* pszBusName, double dKV, int* pDeviceHnd );
+int __stdcall OlxAPIFindBusNo( int nBusNo );
+int __stdcall OlxAPIFindEquipmentByTag( char *szTags, int nDevType, int *pnHnd );
+const char* __stdcall OlxAPIFullBranchName( int nBranchHnd );
+const char* __stdcall OlxAPIFullBusName( int nBusHnd );
+const char* __stdcall OlxAPIFullRelayName( int nRelayHnd );
+int __stdcall OlxAPIGetBusEquipment( int nBusHnd, int nType, int* pDeviceHnd );
+int __stdcall OlxAPIGetData( int nDeviceHnd, int nParam, void *pOutput );
+int __stdcall OlxAPIGetEquipment( int nType, int *pDeviceHnd );
+int __stdcall OlxAPIGetLogicScheme( int nRlyGrHnd, long * pSchemeHnd );
+int __stdcall OlxAPIGetRelay( int nRlyGrHnd, int *pRelayHnd );
+const char* __stdcall OlxAPIGetObjJournalRecord( int nDeviceHnd );
+const char* __stdcall OlxAPIGetObjMemo( int nDeviceHnd );
+const char* __stdcall OlxAPIGetObjTags( int nDeviceHnd );
+const char* __stdcall OlxAPIGetOlrFileName();
+int __stdcall OlxAPIGetPSCVoltage( int nDeviceHnd, double *dOut1, double *dOut2, int nStyle );
+int __stdcall OlxAPIGetRelayTime( int nRelayHnd, double dFactor, double *pTime, char* szDevice, int nTripOnly );
+int __stdcall OlxAPIGetSCCurrent( int nDeviceHnd, double *dOut1, double *dOut2, int nStyle );
+int __stdcall OlxAPIGetSCVoltage( int nDeviceHnd, double *dOut1, double *dOut2, int nStyle );
+int __stdcall OlxAPIGetSteppedEvent( int nStep, double *dTime, double *dCurrent,
+   int *nUserEvent, char* szEventDesc, char* szFaultDesc );
+int __stdcall OlxAPILoadDataFile( char *szFilePath, int bReadOnly );
+int __stdcall OlxAPIMakeOutageList( int nHandle, int nMxTiers, int nWantedBrType,
+   int *vnList, int *pnListLen );
+int __stdcall OlxAPINextBusByName( int* pDeviceHnd );
+int __stdcall OlxAPINextBusByNumber( int* pDeviceHnd );
+int __stdcall OlxAPIPickFault( int nFltIndex, int nWantedTiers );
+int __stdcall OlxAPIPostData( int nDeviceHnd );
+const char* __stdcall OlxAPIPrintObj1LPF( int nHandle );
+int __stdcall OlxAPIReadChangeFile( char *szPathname );
+int __stdcall OlxAPIRun1LPFCommand( char *szBuf );
+int __stdcall OlxAPISaveDataFile( char *szFilePath );
+int __stdcall OlxAPISetData( int nDeviceHnd, int nParam, void *pVal );
+const char* __stdcall OlxAPISetObjMemo( int nDeviceHnd, char *szT );
+const char* __stdcall OlxAPISetObjTags( int nDeviceHnd, char *szT );
+int __stdcall OlxAPIVersionInfo( char *szBuf );

@@ -5,7 +5,7 @@
 */
 
 #include "stdafx.h"
-#include "TestBenchOlrxAPI.h"
+#include "TestBenchOlxAPI.h"
 #include "TTYWindow.h"
 #include "afxdialogex.h"
 

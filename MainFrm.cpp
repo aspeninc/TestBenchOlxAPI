@@ -6,7 +6,7 @@
 */
 
 #include "stdafx.h"
-#include "TestBenchOlrxAPI.h"
+#include "TestBenchOlxAPI.h"
 
 #include "MainFrm.h"
 

@@ -33,13 +33,19 @@
     <ClInclude Include="Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TestBenchOlrxAPI.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="TTYWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\olrxapi.h">
+    <ClInclude Include="DiffAndMerge.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Run1LPFCmd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\olxapi.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TestBenchOlxAPI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -56,10 +62,16 @@
     <ClCompile Include="UnittestView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TestBenchOlrxAPI.cpp">
+    <ClCompile Include="TTYWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TTYWindow.cpp">
+    <ClCompile Include="DiffAndMerge.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Run1LPFCmd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TestBenchOlxAPI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -85,9 +97,9 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <Library Include="bin\olrxapi.lib" />
+    <Text Include="ReadMe.md" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="ReadMe.md" />
+    <Library Include="bin\olxapi.lib" />
   </ItemGroup>
 </Project>
