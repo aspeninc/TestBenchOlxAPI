@@ -151,17 +151,38 @@ void CUnittestDoc::Dump(CDumpContext& dc) const
 //
 void ShowTTY( CString sText, BOOL bAppend );
 BOOL CUnittestDoc::OnOpenDocument( LPCTSTR lpszPathName ) {
-   if ( OLRXAPI_OK != OlxAPILoadDataFile( (char*)lpszPathName, FALSE ) ) {
-      if ( OLRXAPI_OK != OlxAPILoadDataFile( (char*)lpszPathName, TRUE ) ) {
-         AfxMessageBox( OlxAPIErrorString() );
-         m_nFileOpen = 0;
-         return FALSE;
+   int nRet;
+   CString sMsg;
+   m_nFileOpen = 0;
+   nRet = OlxAPILoadDataFile( (char*)lpszPathName, FALSE );
+   if ( OLXAPI_FAILURE == nRet ) {// Retry with readonly flag
+      nRet = OlxAPILoadDataFile( (char*)lpszPathName, TRUE );
+      if ( OLRXAPI_FAILURE == nRet  ) {
+            AfxMessageBox( OlxAPIErrorString() );
+            return FALSE;
       }
       m_nFileOpen = 2;
-      AfxMessageBox( "File had been openned in read-only mode." );
+      sMsg = "File had been openned as read-only.";
    } else {
       m_nFileOpen = 1;
-      AfxMessageBox( "File had been openned successfully" );
+      sMsg = "File had been openned successfully.";
+   }
+   if ( nRet == OLXAPI_DATAFILEANOMALIES )
+      sMsg += CString("\n") + OlxAPIErrorString();
+   AfxMessageBox( sMsg );
+   if (  nRet == OLXAPI_DATAFILEANOMALIES ) {
+      char szFilePath[MAX_PATH], szLine[512];
+      GetTempPath( MAX_PATH, szFilePath );
+      strcat( szFilePath, pszPSTTYLogFileName );
+      FILE *fLogFile = fopen( szFilePath, "rt" );
+      if ( fLogFile ) {
+         sMsg = "";
+         while ( !feof( fLogFile ) ) {
+            if ( fgets( szLine, 512, fLogFile ) )
+                 sMsg += szLine + CString("\r\n");
+         }
+         ShowTTY( sMsg, FALSE );
+      }
    }
 	return TRUE;
 }

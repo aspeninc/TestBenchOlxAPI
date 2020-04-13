@@ -6,16 +6,18 @@
 #pragma once
 
 // To be shipped with OneLiner V14 only
-#define OLRXAPI_FAILED      0
-#define OLRXAPI_OK          1
-#define OLRXAPI_FAILURE 0
+#define OLRXAPI_OK                        1
+#define OLRXAPI_FAILED                    0
+#define OLRXAPI_FAILURE                   0
+#define OLRXAPI_DATAFILEANOMALIES         2
 #define OLRXAPI_STATE_UNINITIALIZED       0
 #define OLRXAPI_STATE_INITIALIZED         1
 #define OLRXAPI_STATE_SCRIPTINITIALIZED   2
 ///
-#define OLXAPI_FAILED      0
-#define OLXAPI_OK          1
-#define OLXAPI_FAILURE 0
+#define OLXAPI_OK                        1
+#define OLXAPI_FAILED                    0
+#define OLXAPI_FAILURE                   0
+#define OLXAPI_DATAFILEANOMALIES         2
 #define OLXAPI_STATE_UNINITIALIZED       0
 #define OLXAPI_STATE_INITIALIZED         1
 #define OLXAPI_STATE_SCRIPTINITIALIZED   2
@@ -804,3 +806,5 @@ int __stdcall OlxAPISetData( int nDeviceHnd, int nParam, void *pVal );
 const char* __stdcall OlxAPISetObjMemo( int nDeviceHnd, char *szT );
 const char* __stdcall OlxAPISetObjTags( int nDeviceHnd, char *szT );
 int __stdcall OlxAPIVersionInfo( char *szBuf );
+
+#define pszPSTTYLogFileName "PowerScriptTTYLog.txt"
