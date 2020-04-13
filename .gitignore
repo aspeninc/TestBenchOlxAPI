@@ -25,3 +25,4 @@
 /bin/olxapi.exp
 /bin/olxapi.pdb
 *.ilk
+*.opensdf
