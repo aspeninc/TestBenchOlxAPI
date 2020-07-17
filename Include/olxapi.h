@@ -159,6 +159,9 @@
 #define GE_nFixedPQ 313
 #define GE_nBusHnd 314
 #define GU_nOnline 315
+#define GU_nGenHnd 316
+#define GU_vdR 503
+#define GU_vdX 504
 #define SV_nActive 316
 #define SV_nCtrlBusHnd 317
 #define SV_nCtrlMode 318
@@ -166,12 +169,12 @@
 #define SV_nBusHnd 320
 #define SH_nBusHnd 321
 #define SU_nOnline 322
+#define SU_nShuntHnd 323
 #define SU_n3WX 323
 #define LU_nOnline 324
+#define LU_nLoadHnd 325
 #define LU_vdMW 501
 #define LU_vdMVAR 502
-#define GU_vdR 503
-#define GU_vdX 504
 #define SV_vdBinc 505
 #define SV_vdB0inc 506
 #define BR_nType 301
@@ -194,13 +197,24 @@
 #define SY_nNOxfmr 309
 #define SY_nNOxfmr3 310
 #define SY_nNOps 311
-#define SY_nNOmutual 312
-#define SY_nNODSRly 313
-#define SY_nNOOCRly 314
-#define SY_nNORclsr 315
-#define SY_nNODiffRly 316
-#define SY_nNOVRly 317
-#define SY_nNOIED 318
+#define SY_nNOmutual  312
+#define SY_nNOswitch  313,
+#define SY_nNOloadUnit 314
+#define SY_nNOsvd 315
+#define SY_nNOrlyOCP 316
+#define SY_nNOrlyOCG 317
+#define SY_nNOrlyDSP 318
+#define SY_nNOrlyDSG 319
+#define SY_nNOrlyD 320
+#define SY_nNOrlyV 321
+#define SY_nNOfuse 322
+#define SY_nNOrecloserG 323
+#define SY_nNOrecloserP 324
+#define SY_nNOshuntUnit 325
+#define SY_nNOccgen 326
+#define SY_nNObreaker 327
+#define SY_nNOscheme 328
+#define SY_nNOIED 329
 #define LN_sName 101
 #define LN_sID 102
 #define LN_sLengthUnit 103
@@ -388,6 +402,8 @@
 #define SC_nBus2Hnd 307
 #define SC_nInService 308
 #define SC_nSComp 309
+#define SC_nRlyGr1Hnd 310
+#define SC_nRlyGr2Hnd 311
 #define MU_dFrom1 201
 #define MU_dFrom2 202
 #define MU_dTo1 203
@@ -736,6 +752,307 @@ int __stdcall OlrxAPIPostData( int nDeviceHnd );
 const char* __stdcall OlrxAPIPrintObj1LPF( int nHandle );
 int __stdcall OlrxAPIReadChangeFile( char *szPathname );
 int __stdcall OlrxAPIRun1LPFCommand( char *szBuf );
+/* Run OneLiner/PowerFlow command
+   szBuf is a XML string, or full path name to XML file, containing a XML node
+   - Node name: OneLiner command
+   - Node attributes and text: required command parameters
+   
+   Returns:
+        OLXAPI_FAILURE: Failure
+        OLXAPI_OK     : Success. Excepted when noted below
+
+   Command: ARCFLASHCALCULATOR - Faults | Arc-flash hazard calculator
+   Attributes:
+         REPORTPATHNAME	(*) Full pathname of report file.
+         APPENDREPORT            [0] Append to existing report 0-No;1-Yes
+         OUTFILETYPE 	[2] Output file type 1- TXT; 2- CSV
+         SELECTEDOBJ	Arcflash bus. Must  have one of following values
+                  "PICKED " 	the highlighted bus on the 1-line diagram
+                  "'BNAME1                ,KV1;’BNAME2’,KV2;..."  Bus name and nominal kV.
+         TIERS	[0] Number of tiers around selected object. This attribute is ignored if SELECTEDOBJ is not found.
+         AREAS	[0-9999] Comma delimited list of area numbers and ranges to check relaygroups agains backup.
+                        This attribute is ignored if SELECTEDOBJ is found.
+         ZONES	[0-9999] Comma delimited list of zone numbers and ranges to check relaygroups agains backup.
+                     This attribute is ignored if AREAS or SELECTEDOBJ are found.
+         KVS	[0-999] Comma delimited list of KV levels and ranges to check relaygroups agains backup.
+                     This attribute is ignored if SELECTEDOBJ is found.
+         TAGS	Comma delimited list of bus tags. This attribute is ignored if SELECTEDOBJ is found.
+         EQUIPMENTCAT	(*) Equipment category: 0-Switch gear; 1- Cable; 2- Open air; 3- MCC                s and panelboards 1kV or lower
+         GROUNDED	(*) Is the equipment grounded 0-No; 1-Yes
+         ENCLOSED	(*) Is the equipment inside enclosure 0-No; 1-Yes
+         CONDUCTORGAP	(*) Conductor gap in mm
+         WORKDIST	(*) Working distance in inches
+         ARCDURATION	Arc duration calculation method. Must have one of following values:
+                  "FIXED" 	Use fixed duration
+                  "FUSE " 	Use fuse curve
+                  "FASTEST" 	Use fastest trip time of device in vicinity
+                  "DEVICE" 	Use trip time of specified device
+                  "SEA" 	Use stepped-event analysis
+         ARCTIME	Arc duration in second. Must be present when ARCDURATION="FIXED"
+         FUSECURVE	Fuse curve for arc duration calculation. Must be present when ARCDURATION=" FUSECURVE"
+         BRKINTTIME	Breaker interrupting time in cycle. Must be present when ARCDURATION=" FASTEST" and "DEVICE"
+         DEVICETIERS	[1] Number of tiers. Must be present when ARCDURATION=" FASTEST" and ="SEA"
+         DEVICE	String  with location of the relaygroup and the relay name
+                  "BNO1;                BNAME1                ;KV1;BNO2;                BNAME2                ;KV2;                CKT                ;BTYP; RELAY_ID; ".
+                  Format description of these fields are is in OneLiner help section 10.2.
+         ARCTIMELIMIT	[1] Perform no energy calculation when arc duration time is longer than 2 seconds
+
+   Command: BUSFAULTSUMMARY : Faults | Bus fault summary
+   Attributes:
+      REPORTPATHNAME= (*) full valid path to report file
+      BASELINECASE= pathname of base-line bus fault summary report in CSV format
+      === Only when BASELINECASE is specified
+      DIFFBASE= Basis for computing current deviation: [MAX3PH1LG] or MAXPHGND
+      FLAGPCNT= [15] Current deviation percent threshold.
+      === Only when BASELINECASE is not specified
+      BUSLIST= Bus list, one on each row in format 'BusName',kV
+      BUSNOLIST= Bus number list, coma delimited.
+                  This attribute is ignored when BUSLIST is specified
+      === Only when no BUSLIST and BUSNOLIST is  specified
+      XGND= Fault reactance X
+      RGND= Fault resistance R
+      NOTAP= Exclude tap buses: [1]-TRUE; 0-FALSE
+      PERUNITV= Report voltage in PU
+      PERUNIT= Report current in PU
+      AREAS= Area number range
+      ZONES= Zone number range. This attribute is ignored when AREAS is specified
+      BUSNOS= Additional bus number range
+      KVS= Additional bus kV range
+      TAGS= Additional tag filter
+      TIERS= check lines in vicinity within this tier number
+      AREAS= Check all lines in area range
+      ZONES= Check all lines in zone range
+      KVS=   Additional KV filter
+
+   Command: CHECKRELAYOPERATIONPRC023 - Check | Relay loadability
+   Attributes:
+      REPORTPATHNAME= (*) full valid pathname of report file
+      REPORTCOMMENT= Report comment string. 255 char or shorter
+      SELECTEDOBJ=
+            PICKED Check devices in selected relaygroup
+            BNO1;'BNAME1';KV1;BNO2;'BNAME2';KV2;'CKT';BTYP;  location string of branch to check(OneLiner Help section 10.2)
+      TIERS= check relaygroups in vicinity within this tier number
+      AREAS= Check all relaygroups in area range
+      ZONES= Check all relaygroups in zone range
+      KVS=   Additional KV filter
+      TAGS=  Additional tag filter
+      USETAGFLAG= [0]-AND;[1]-OR
+      DEVICETYPE= [OCP DSP] Devide type to check. Space delimited
+      APPENDREPORT=	Append report file: 0-False; [1]-True
+      LINERATINGTYPE=	[3] Line rating to use: 0-first; 1-second; 2-Third;	3-Fourth
+      XFMRRATINGTYPE=	[2] Transformer rating to use: 0-MVA1; 1-MVA2; 2-MVA3
+      FWRLOADLONLY= [0] Consider load in forward direction only
+      VOLTAGEPU= [0.85] Per unit voltage
+      LINECURRMULT= [1.5] Line load current multiplier
+      XFMRCURRMULT= [1.5] Transformer load current multiplier
+      PFANGLE= [30] Power factor angle
+
+   Command: CHECKRELAYOPERATIONPRC026 - run Check | Relay performance in stable power swing (PRC-026-1)
+   Attributes:
+      REPORTPATHNAME= (*) full valid pathname of report file
+      REPORTCOMMENT= Report comment string. 255 char or shorter
+      SELECTEDOBJ=
+            PICKED Check devices in selected relaygroup
+            BNO1;'BNAME1';KV1;BNO2;'BNAME2';KV2;'CKT';BTYP;  location string of line to check(Help section 10.2)
+      TIERS= check relaygroups in vicinity within this tier number
+      AREAS= Check all relaygroups in area range
+      ZONES= Check all relaygroups in zone range
+      KVS=   Additional KV filter
+      TAGS=  Additional tag filter
+      DEVICETYPE= [OCP DSP] Devide type to check. Space delimited
+      APPENDREPORT=	Append report file: 0-False; [1]-True
+      SEPARATIONANGLE=	[120] System separation angle for stable power swing calculation
+      DELAYLIMIT= [15] Report violation if relay trips faster than this limit (in cycles)
+      CURRMULT= [1.0] Current multiplier to apply in relay trip checking
+
+   Command: CHECKPRIBACKCOORD - Check | Primary/back relay coordination
+   Attributes:
+         REPORTPATHNAME  (*) Full pathname of report file.
+         OUTFILETYPE     [2] Output file type 1- TXT; 2- CSV
+         SELECTEDOBJ	Relay group to check against its backup. Must  have one of following values
+         PICKED      the highlighted relaygroup on the 1-line diagram
+         "BNO1;'BNAME1';KV1;BNO2;'BNAME2';KV2;'CKT';BTYP;"  location string of the relaygroup. Format description is in OneLiner help section 10.2.
+         TIERS	[0] Number of tiers around selected object. This attribute is ignored if SELECTEDOBJ is not found.
+         AREAS	[0-9999] Comma delimited list of area numbers and ranges to check relaygroups agains backup.
+         ZONES	[0-9999] Comma delimited list of zone numbers and ranges to check relaygroups agains backup. This attribute is ignored if AREAS is found.
+         KVS	0-999] Comma delimited list of KV levels and ranges to check relaygroups agains backup. This attribute is ignored if SELECTEDOBJ is found.
+         TAGS	Comma delimited list of tags to check relaygroups agains backup. This attribute is ignored if SELECTEDOBJ is found.
+         COORDTYPE	Coordination type to check. Must  have one of following values
+         "0"	OC backup/OC primary (Classical)
+         "1"	OC backup/OC primary (Multi-point)
+         "2"	DS backup/OC primary
+         "3"	OC backup/DS primary
+         "4"	DS backup/DS primary
+         "5"	OC backup/Recloser primary
+         "6"	All types/All types
+         LINEPERCENT	Percent interval for sliding intermediate faults. This attribute is ignored if COORDTYPE is 0 or 5.
+         RUNINTERMEOP	1-true; 0-false. Check  intermediate faults with end-opened. This attribute is ignored if COORDTYPE is 0 or 5.
+         RUNCLOSEIN	1-true; 0-false. Check close-in fault. This attribute is ignored if COORDTYPE is 0 or 5.
+         RUNCLOSEINEOP	1-true; 0-false. Check close-in fault with end-opened. This attribute is ignored if COORDTYPE is 0 or 5.
+         RUNLINEEND	1-true; 0-false. Check line-end fault. This attribute is ignored if COORDTYPE is 0 or 5.
+         RUNREMOTEBUS	1-true; 0-false. Check remote bus fault. This attribute is ignored if COORDTYPE is 0 or 5.
+         RELAYTYPE	Relay types to check: 1-Ground; 2-Phase; 3-Both.
+         FAULTTYPE	Fault  types to check: 1-3LG; 2-2LG; 4-1LF; 8-LL; or sum of values for desired selection
+         OUTPUTALL	1- Include all cases in report; 0- Include only flagged cases in report
+         MINCTI	Lower limit of acceptable CTI range
+         MAXCTI	Upper limit of acceptable CTI range
+         OUTRLYPARAMS	Include relay settings in report: 0-None; 1-OC;2-DS;3-Both
+         OUTAGELINES	Run line outage contingency: 0-False; 1-True
+         OUTAGEXFMRS	Run transformer outage contingency: 0-False; 1-True
+         OUTAGEMULINES	Run mutual line outage contingency: 0-False; 1-True. Ignored if OUTAGEMULINES=0
+         OUTAGEMULINESGND		Run mutual line outage and grounded contingency: 0-False; 1-True. Ignored if OUTAGEMULINES=0
+         OUTAGE2LINES	Run double line outage contingency: 0-False; 1-True. Ignored if OUTAGEMULINES=0
+         OUTAGE1LINE1XFMR	Run double line and transformer outage contingency: 0-False; 1-True. Ignored if OUTAGEMULINES=0 or OUTAGEXFMRS =0
+         OUTAGE2XFMRS	Run double and transformer outage contingency: 0-False; 1-True. Ignored if OUTAGEXFMRS =0
+         OUTAGE3SOURCES	Outage only  3 strongest sources: 0-False; 1-True. Ignored if OUTAGEMULINES=0 and OUTAGEXFMRS =0
+
+   Command: CHECKRELAYOPERATIONSEA - Check | Relay operation using stepped-events
+   Attributes:
+         REPORTPATHNAME	(*) Full pathname of folder for report files.
+         REPORTCOMMENT		Additional comment string to include in all checking report files
+         SELECTEDOBJ	Check line with selected relaygroup. Must  have one of following values
+         "PICKED " 	the highlighted relaygroup on the 1-line diagram
+         "BNO1;'BNAME1';KV1;BNO2;'BNAME2';KV2;'CKT';BTYP;"  location string of  the relaygroup. Format description is in OneLiner help section 10.2.
+         TIERS	[0] Number of tiers around selected object. This attribute is ignored if SELECTEDOBJ is not found.
+         AREAS	[0-9999] Comma delimited list of area numbers and ranges.
+         ZONES	[0-9999] Comma delimited list of zone numbers and ranges. This attribute is ignored if AREAS is found.
+         KVS	[0-999] Comma delimited list of KV levels and ranges. This attribute is ignored if SELECTEDOBJ is found.
+         TAGS	Comma delimited list of tags. This attribute is ignored if SELECTEDOBJ is found.
+         DEVICETYPE	Space delimited list of relay type types to take into consideration in stepped-events: OCG, OCP, DSG, DSP, LOGIC, VOLTAGE, DIFF
+         FAULTTYPE	Space delimited list of fault  types to take into consideration in stepped-events: 1LF, 3LG
+         OUTAGELINES	Run line outage contingency: 0-False; 1-True
+         OUTAGEXFMRS	Run transformer outage contingency: 0-False; 1-True
+         OUTAGEMULINES	Run mutual line outage contingency: 0-False; 1-True. Ignored if OUTAGEMULINES=0
+         OUTAGEMULINESGND		Run mutual line outage and grounded contingency: 0-False; 1-True. Ignored if OUTAGEMULINES=0
+         OUTAGE2LINES	Run double line outage contingency: 0-False; 1-True. Ignored if OUTAGEMULINES=0
+         OUTAGE1LINE1XFMR	Run double line and transformer outage contingency: 0-False; 1-True. Ignored if OUTAGEMULINES=0 or OUTAGEXFMRS =0
+         OUTAGE2XFMRS	Run double and transformer outage contingency: 0-False; 1-True. Ignored if OUTAGEXFMRS =0
+         OUTAGE3SOURCES	Outage only  3 strongest sources: 0-False; 1-True. Ignored if OUTAGEMULINES=0 and OUTAGEXFMRS =0
+
+   Command: SETGENREFANGLE - Network | Set generator reference angle
+   Attributes:
+         REPORTPATHNAME	Full pathname of folder for report files.
+         REFERENCEGEN	Bus name and kV of reference generator in format: 'BNAME', KV.
+         EQUSOURCEOPTION	Option for calculating reference angle of equivalent sources. Must have one of the following values
+         [ROTATE] 	apply delta angle of existing reference gen
+         SKIP   	Leave unchanged. This option will be in effect automatically when old reference is not valid
+         ASGEN  	Use angle computed for regular generator
+
+   Command: CHECKRELAYSETTINGS - Check | Relay settings
+   Attributes:
+      SELECTEDOBJ=
+            PICKED Check line with selected relaygroup
+            BNO1;'BNAME1';KV1;BNO2;'BNAME2';KV2;'CKT';BTYP;  location string of line to check(Help section 10.2)
+      TIERS= check lines in vicinity within this tier number
+      AREAS= Check all lines in area range
+      ZONES= Check all lines in zone range
+      KVS=   Additional KV filter
+      TAGS=  Additional tag filter
+      REPORTPATHNAME= (*) full valid path to report folder with write access
+      REPORTCOMMENT= Report comment string. 255 char or shorter
+      FAULTTYPE= 1LG, 3LG. Fault type to check. Space delimited
+      DEVICETYPE= OCG, OCP, DSG, DSP, LOGIC, VOLTAGE, DIFF Devide type to check. Space delimited
+      OUTAGELINES	Run Line outage contingency: 0-False; 1-True
+      OUTAGEXFMRS	Run transformer outage contingency: 0-False; 1-True
+      OUTAGE3SOURCES= 1 or 0 Outage only 3 strongest sources
+      OUTAGEMULINES= 1 or 0 Outage mutually coupled lines
+      OUTAGEMULINESGND= 1 or 0 Outage and ground ends of mutually coupled lines
+      OUTAGE2LINES= 1 or 0 Double outage lines
+      OUTAGE1LINE1XFMR= 1 or 0 Double outage line and transformer
+      OUTAGE2XFMR= 1 or 0 Double outage transformers
+
+   Command: EXPORTNETWORK = File | Export network data
+   Attributes:
+      FORMAT     = Output format: [DXT]-ASPEN DXT; PSSE-PSS/E Raw and Seq
+      SCOPE      =  Export scope: [0]-Entire network; 1-Area number; 2- Zone number
+      AREANO     =  Export area number
+      ZONENO	  =  Export zone number
+      INCLUDETIES=  Include ties: [0]-False; 1-True
+      ====DXT export only:
+      DXTPATHNAME= (*) full valid pathname of ouput DXT file
+      ====PSSE export only:
+      RAWPATHNAME= (*) full valid pathname of ouput RAW file
+      SEQPATHNAME= (*) full valid pathname of ouput SEQ file
+      PSSEVER	  =  [33] PSS/E version
+      X3MIDBUSNO =  [18000] First fictitious bus number for 3-w transformer mid point
+      NEWBUSNO   =  [15000] First bus number for buses with no bus number
+
+   Command EXPORTRELAY - Relay | Export relay
+   Attributes:
+      FORMAT     =  Output format: [RAT]-ASPEN RAT;
+      SCOPE      =  Export scope: [0]-Entire network; 1-Area number; 2- Zone number; 3-Invicinity of a bus
+      AREANO     =  Export area number (*required when SCOPE=1)
+      ZONENO	  =  Export zone number (*required when SCOPE=2)
+      SELECTEDOBJ=  Selected bus (*required when SCOPE=3). Must be a string with following content
+                     PICKED - Selected bus on the 1-line diagram
+                     'BusName' kV - Bus name in single quotes and kV separated by space
+      TIERS      =  [0] Number of tiers (ignored when SCOPE<>3)
+      DEVICETYPE =  Device type to export. Comma delimied list of the following:
+                     OC: Overcurrent
+                     DS: Distance
+                     RC: Recloser
+                     VR: Voltage relay
+                     DIFF: Differential relay
+                     SCHEME: Logic scheme
+                     COORDPAIR: Coorination pair
+                     [OC,DS,RC,VR,DIFF,COORDPAIR,SCHEME]
+      LASTCHANGEDDATE =  [01-01-1986] Cutoff last changed date
+      RATPATHNAME= (*) full valid pathname of ouput RAT file
+
+   Command: INSERTTAPBUS - Network | Bus | Insert tap bus
+   Attributes:
+      BUSNAME1=	(*) Line bus 1 name
+      BUSNAME2=	(*) Line bus 2 name
+      KV=	(*) Line kV
+      CKTID=	(*) Line circuit ID
+      PERCENT=	(*) Percent distance to tap from bus 1 (must be between 0-100)
+      TAPBUSNAME=	(*) Tap bus name
+
+   Command: SAVEDATAFILE - File | Save and File | Save as
+   Attributes:
+      PATHNAME     = Name or full pathname of new OLR file for File | Save as command.
+                     If only file name is given, file will be saved in the folder
+                     where the current OLR file is located.
+                     If no attribute is specified, the File | Save command will be executed.
+
+   Command SAVEFLTSPEC - Save desc and spec of faults in the result buffer to XML or CSV files
+   Attributes:
+      REPORTPATHNAME= (*) output file pathname
+      APPEND= [0]: overwrite existing file; 1: Append to existing file; 
+      FORMAT= output file format [0]: XML; 1: CSV
+      CLEARPREV= Clear previous results flag to be recorded in the XML output
+                  [0]: no; 1: yes; 
+      RANGE= Comma delimited list of fault index numbers and ranges(e.g. 1,3,5-10)
+             Default: save all faults in the results buffer
+
+   Command SAVEFLTSPEC - Save desc and spec of faults in the result buffer to XML or CSV files
+   Attributes:
+         REPORTPATHNAME= (*)Output file pathname
+         APPEND= [0]: overwrite existing file; 1: Append to existing file; 
+         FORMAT= output file format [0]: XML; 1: CSV
+         CLEARPREV= Clear previous results flag to be recorded in the XML output
+                     [0]: no; 1: yes; 
+         RANGE= Comma delimited list of fault index numbers and ranges(e.g. 1,3,5-10)
+               Default: save all faults in the results buffer
+
+   Command SIMULATEFAULT - Run OneLiner command FAULTS  | BATCH COMMAND & FAULT SPEC FILE | EXECUTE COMMAND
+   Attributes: 
+         <FAULT> The <SIMULATEFAULT> XML node must contain one or more children nodes <FAULT>, 
+                  one for each fault case to be simulated. 
+         <FLTSPEC>  Each of the <FAULT> nodes can include up to 40 fault specifications to be 
+                  simulated in the case. Fault specification string in the format described in 
+                  OneLiner’s user manual APPENDIX I:  FAULT SPECIFICATION FILE 
+                  must be included as the text of children nodes <FLTSPEC>. 
+         FLTSPCVS= Alternatively, a tab-delimited list of all the fault spec strings can be entered as 
+                  the attribute "FLTSPCVS" in the <FAULT> node. 
+         CLEARPREV= Clear previous result buffer flag [0]: no; 1: yes; 
+   Returns:
+         OLXAPI_FAILURE: Failure
+         NOfault       : Total number of faults in the solution buffer
+   Remark:
+         When NOfault is not the value you expected, call OlxAPIErrorString() for details of simulation error
+
+*/
 int __stdcall OlrxAPISaveDataFile( char *szFilePath );
 int __stdcall OlrxAPISetData( int nDeviceHnd, int nParam, void *pVal );
 const char* __stdcall OlrxAPISetObjMemo( int nDeviceHnd, char *szT );
@@ -768,6 +1085,16 @@ int __stdcall OlxAPIDoFault( int nDevHnd, int *nFltConn,
 int __stdcall OlxAPIDoSteppedEvent( int nDevHnd, double *dFltOpt, int *nDevOpt, long nTiers );
 int __stdcall OlxAPIEquipmentType( int nDevHnd );
 const char* __stdcall OlxAPIErrorString();
+
+const char* __stdcall OlxAPIFaultDescriptionEx( 
+   // Return description string of a fault in the simulation results buffer.
+   int nFltIdx,      // Index number of fault case.
+   int nOpt );       // Output flag:
+                     // [0] Fault description string only
+                     // 1   Plus FLTSPCVS on the last line
+                     // 2   Plus FLTOPTSTR on the last line
+                     //     See SIMULATEFAULT for details of FLTSPCVS and FLTOPTSTR 
+
 const char* __stdcall OlxAPIFaultDescription( int nFltIdx );
 int __stdcall OlxAPIFindBusByName( const char* pszBusName, double dKV, int* pDeviceHnd );
 int __stdcall OlxAPIFindBusByName( const char* pszBusName, double dKV, int* pDeviceHnd );
@@ -792,8 +1119,24 @@ int __stdcall OlxAPIGetSCVoltage( int nDeviceHnd, double *dOut1, double *dOut2, 
 int __stdcall OlxAPIGetSteppedEvent( int nStep, double *dTime, double *dCurrent,
    int *nUserEvent, char* szEventDesc, char* szFaultDesc );
 int __stdcall OlxAPILoadDataFile( char *szFilePath, int bReadOnly );
-int __stdcall OlxAPIMakeOutageList( int nHandle, int nMxTiers, int nWantedBrType,
-   int *vnList, int *pnListLen );
+int __stdcall OlxAPIMakeOutageList( int nHandle, int nMxTiers, int nWantedBrType, int *vnList, int *pnListLen );
+/* Purpose: Return list of neighboring branches that can be used as outage list 
+            in the DoFault function on a bus, branch or relay group.
+   Parameters:
+      nHandle      [in] Handle number of a bus, relay group or branch.
+      nMaxTiers    [in] Number of tiers (must be positive) 
+      nWantedTypes [in] Branch type. Sum of one or more following values: 1- Line; 
+                   2- 2-winding transformer; 4- Phase shifter; 8- 3-winding transformer; 
+                   16- Switch;
+      vnList       [out] outage list (with zero in the last element).
+      pnListLen    [in] Length of vnList array
+                   [out] Number of outage branches found.
+   Return value: 
+      0               Failure
+      1               Success
+   Remarks: Call this function with NULL in place of vnList to determine the 
+            number of outage branches found within the number of tiers specified.
+*/
 int __stdcall OlxAPINextBusByName( int* pDeviceHnd );
 int __stdcall OlxAPINextBusByNumber( int* pDeviceHnd );
 int __stdcall OlxAPIPickFault( int nFltIndex, int nWantedTiers );
