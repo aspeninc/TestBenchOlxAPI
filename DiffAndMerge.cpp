@@ -88,7 +88,7 @@ void CDiffAndMerge::OnBnClickedButtonBase() {
 
 void CDiffAndMerge::OnBnClickedButtonDiffFile() {
    CFileDialog cFD( FALSE, "*.XML", NULL, OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT,
-                    "OneLiner Diff File (*.XML)|*.XML||" );
+                    "OneLiner Diff File (*.ADX,*.XML)|*.ADX;*.XML||" );
    cFD.m_ofn.lpstrTitle = "Diff File";
    if ( cFD.DoModal() != IDOK )
       return;
@@ -211,7 +211,7 @@ void TestDiffNMerge() {
       CString( "FILEPATHDIFF =\"" ) + sFileDiff + CString( "\" " ) +
       CString( "FILEPATHMERGED =\"" ) + sFileMerged + CString( "\" " ) +
       CString( " />" );
-   if ( OLRXAPI_OK != OlxAPIRun1LPFCommand( sXML.GetBuffer() ) )
+   if ( OLXAPI_OK != OlxAPIRun1LPFCommand( sXML.GetBuffer() ) )
       AfxMessageBox( OlxAPIErrorString() );
    // MergedAB and B must be the same
    sFileDiff = sPath + CString( "Diff_MergedAB_B.xlm" );
@@ -222,7 +222,7 @@ void TestDiffNMerge() {
 //      CString( "FILEPATHBASE =\"" ) + sFileBase + CString( "\" " ) +
       CString( "FILEPATHDIFF =\"" ) + sFileDiff + CString( "\" " ) +
       CString( " />" );
-   if ( OLRXAPI_OK != OlxAPIRun1LPFCommand( sXML.GetBuffer() ) )
+   if ( OLXAPI_OK != OlxAPIRun1LPFCommand( sXML.GetBuffer() ) )
       AfxMessageBox( OlxAPIErrorString() );
    std::ifstream diffFile( sFileDiff );
    std::string line;

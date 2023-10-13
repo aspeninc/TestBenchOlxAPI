@@ -117,7 +117,7 @@ BOOL CUnittestApp::InitInstance()
 	m_pMainWnd->UpdateWindow();
 
    CString sMsg = OlxAPIErrorString();
-   if ( sMsg == "No Error" ) {
+   if ( sMsg == "No Error" ) {    // OlxAPI.dll loaded successfully
       OlxAPIVersionInfo( sMsg.GetBufferSetLength( 512 ) );
       sMsg.ReleaseBuffer();
    }

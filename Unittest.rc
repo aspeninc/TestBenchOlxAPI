@@ -110,6 +110,7 @@ BEGIN
         MENUITEM "Fault Simulation",            ID_TEST_FAULTSIMULATION
         MENUITEM "Diff and Merge",              ID_TEST_DIFFANDMERGE
         MENUITEM "Run1LPFCmd ...",              ID_TEST_RUN1LPFCMD
+        MENUITEM "API Call",                    ID_TEST_APICALL
     END
 END
 

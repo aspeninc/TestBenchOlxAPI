@@ -1,11 +1,10 @@
-
 /* UnittestDoc.cpp : implementation of the CUnittestDoc class
-
-   Copyright (c) 1987-2019 Advanced Systems for Power Engineering, Inc. (ASPEN).
+   Copyright (c) 1987-2021 Advanced Systems for Power Engineering, Inc. (ASPEN).
    All rights reserved. 
 */
 
 #include "stdafx.h"
+
 // SHARED_HANDLERS can be defined in an ATL project implementing preview, thumbnail
 // and search filter handlers and allows sharing of document code with that project.
 #ifndef SHARED_HANDLERS
@@ -36,6 +35,8 @@ BEGIN_MESSAGE_MAP(CUnittestDoc, CDocument)
    ON_COMMAND( ID_TEST_DIFFANDMERGE, &CUnittestDoc::OnTestDiffandMerge )
    ON_COMMAND( ID_TEST_RUN1LPFCMD, &CUnittestDoc::OnTestRun1lPFCmd )
    ON_UPDATE_COMMAND_UI( ID_TEST_RUN1LPFCMD, &CUnittestDoc::OnUpdateTestRun1LPFCmd )
+   ON_COMMAND( ID_TEST_APICALL, &CUnittestDoc::OnTestApiCall )
+   ON_UPDATE_COMMAND_UI( ID_TEST_APICALL, &CUnittestDoc::OnUpdateTestApiCall )
 END_MESSAGE_MAP()
 
 
@@ -157,7 +158,7 @@ BOOL CUnittestDoc::OnOpenDocument( LPCTSTR lpszPathName ) {
    nRet = OlxAPILoadDataFile( (char*)lpszPathName, FALSE );
    if ( OLXAPI_FAILURE == nRet ) {// Retry with readonly flag
       nRet = OlxAPILoadDataFile( (char*)lpszPathName, TRUE );
-      if ( OLRXAPI_FAILURE == nRet  ) {
+      if ( OLXAPI_FAILURE == nRet  ) {
             AfxMessageBox( OlxAPIErrorString() );
             return FALSE;
       }
@@ -193,30 +194,145 @@ void CUnittestDoc::OnUpdateTestDataAccess( CCmdUI *pCmdUI ) {
 }
 
 void CUnittestDoc::OnTestDataAccess() {
-//   CTTYWindow ttyDlg;
+   //   CTTYWindow ttyDlg;
    int NObus, nHnd;
-   double dKV;
-   char szName[100];
    CString sT, sTTYText;
 
-   if ( OLRXAPI_OK != OlxAPIGetData( HND_SYS, SY_nNObus, &NObus ) ) {
+   if ( OLXAPI_OK != OlxAPIGetData( HND_SYS, SY_nNObus, &NObus ) ) {
       AfxMessageBox( OlxAPIErrorString() );
       return;
    }
    sTTYText.Format( "OLR Network: %s\r\n\r\nNObus = %d", OlxAPIGetOlrFileName(), NObus );
    nHnd = 0;
-   while ( OLRXAPI_OK == OlxAPIGetEquipment( TC_BUS, &nHnd ) ) {
-      if ( OLRXAPI_OK != OlxAPIGetData( nHnd, BUS_sName, szName ) ) {
+#if 0
+   {
+   BYTE getdata_buff[10*1024]; // min 10KB buffer for array data
+   double *array_data_dbl = (double*)getdata_buff;
+   while ( OLXAPI_OK == OlxAPIGetEquipment( TC_LINE, &nHnd ) ) {
+      if ( OLXAPI_OK != OlxAPIGetData( nHnd, LN_vdRating, array_data_dbl ) ) {
          AfxMessageBox( OlxAPIErrorString() );
          return;
       }
-      if ( OLRXAPI_OK != OlxAPIGetData( nHnd, BUS_dKVnominal, &dKV ) ) {
+      sT.Format( "%s Ratings= %g %g %g %g", OlxAPIPrintObj1LPF(nHnd), array_data_dbl[0], 
+                 array_data_dbl[1], array_data_dbl[2], array_data_dbl[3] );
+      sTTYText += "\r\n" + sT;
+   }
+   }
+#endif
+#if 0
+   {
+   double dKV;
+   char szName[100];
+   while ( OLXAPI_OK == OlxAPIGetEquipment( TC_BUS, &nHnd ) ) {
+      if ( OLXAPI_OK != OlxAPIGetData( nHnd, BUS_sName, szName ) ) {
+         AfxMessageBox( OlxAPIErrorString() );
+         return;
+      }
+      if ( OLXAPI_OK != OlxAPIGetData( nHnd, BUS_dKVnominal, &dKV ) ) {
          AfxMessageBox( OlxAPIErrorString() );
          return;
       }
       sT.Format( "%s %gkV", szName, dKV );
       sTTYText += "\r\n" + sT;
    }
+   }
+#endif
+#if 0
+   {
+   CString sT, sTTYText;
+   double dValue;
+   while ( OLXAPI_OK == OlxAPIGetEquipment( TC_RLYGROUP, &nHnd ) ) {
+      sT.Format( "%s", OlxAPIPrintObj1LPF( nHnd ) );
+      sTTYText += "\r\n" + sT;
+      if ( OLXAPI_OK != OlxAPIGetData( nHnd, RG_dBreakerTime, &dValue ) ) {
+         AfxMessageBox( OlxAPIErrorString() );
+         return;
+      }
+      sT.Format( "BreakerTime=%f", dValue );
+      sTTYText += "\r\n" + sT;
+   }
+   }
+#endif
+//#if 0
+#define MXDSPARAMS   255
+#define MXDSPRMSZ  16
+#define MSDSLBLSZ 25
+   //CString sT, sTTYText;
+   char szParams[MXDSPARAMS*(MXDSPRMSZ+1)], szLabels[MXDSPARAMS*(MSDSLBLSZ+1)],
+        *pLabel, *pParam, *pTabL, *pTabP, szSetDataBuf[MSDSLBLSZ+MXDSPRMSZ+5];
+   nHnd = 0;
+   while ( OLXAPI_OK == OlxAPIGetEquipment( TC_RLYDSP, &nHnd ) ) {
+      sT.Format( "%s", OlxAPIPrintObj1LPF( nHnd ) );
+      sTTYText += "\r\n" + sT;
+      if ( OLXAPI_OK != OlxAPIGetData( nHnd, DP_vParamLabels, szLabels ) ) {
+         AfxMessageBox( OlxAPIErrorString() );
+         return;
+      }
+      if ( OLXAPI_OK != OlxAPIGetData( nHnd, DP_vParams, szParams ) ) {
+         AfxMessageBox( OlxAPIErrorString() );
+         return;
+      }
+      strcpy_s( szSetDataBuf, MSDSLBLSZ+MXDSPRMSZ+5, "" );
+      pLabel = szLabels;
+      pParam = szParams;
+      for ( ; ;  ) {
+         if ( pTabL = strstr( pLabel, "\t" ) )
+            *pTabL = '\0';
+         if ( strlen( pLabel) == 0 )
+            break;
+         if ( pTabP = strstr( pParam, "\t" ) )
+            *pTabP = '\0';
+         sT.Format( "%s=%s", pLabel, pParam );
+         sTTYText += "\r\n" + sT;
+         // To modify
+         if ( strstr(pLabel, "Z2_Imp") )
+            sprintf_s( szSetDataBuf, MSDSLBLSZ+MXDSPRMSZ+5, "%s\t%g", pLabel, 1.5*atof(pParam) );
+         if ( pTabL == NULL || pTabP == NULL )
+            break;
+         pLabel = pTabL+1;
+         pParam = pTabP+1;
+      }
+      if ( strlen( szSetDataBuf ) > 0 ) {
+         // Test OlxAPIGetData() with DP_Params 
+         //BSTR xStrBuff = SysAllocString( (OLECHAR*)szSetDataBuf );
+         //if ( OLXAPI_OK != OlxAPISetData( nHnd, DP_sParam, &xStrBuff ) ) {
+         if ( OLXAPI_OK != OlxAPISetDataEx( nHnd, DP_sParam, szSetDataBuf ) ) {
+            AfxMessageBox( OlxAPIErrorString() );
+            return;
+         }
+         if ( OLXAPI_OK != OlxAPIPostData( nHnd ) ) {
+            AfxMessageBox( OlxAPIErrorString() );
+            return;
+         }
+         sTTYText += CString("\r\nSetData: ") + CString(szSetDataBuf);
+         if ( OLXAPI_OK != OlxAPIGetData( nHnd, DP_vParamLabels, szLabels ) ) {
+            AfxMessageBox( OlxAPIErrorString() );
+            return;
+         }
+         if ( OLXAPI_OK != OlxAPIGetData( nHnd, DP_vParams, szParams ) ) {
+            AfxMessageBox( OlxAPIErrorString() );
+            return;
+         }
+         strcpy_s( szSetDataBuf, MSDSLBLSZ+MXDSPRMSZ+5, "" );
+         pLabel = szLabels;
+         pParam = szParams;
+         for ( ; ;  ) {
+            if ( pTabL = strstr( pLabel, "\t" ) )
+               *pTabL = '\0';
+            if ( strlen( pLabel) == 0 )
+               break;
+            if ( pTabP = strstr( pParam, "\t" ) )
+               *pTabP = '\0';
+            sT.Format( "%s=%s", pLabel, pParam );
+            sTTYText += "\r\n" + sT;
+            if ( pTabL == NULL || pTabP == NULL )
+               break;
+            pLabel = pTabL+1;
+            pParam = pTabP+1;
+         }
+      }
+   }
+//#endif
 //   ttyDlg.DoModal();
    ShowTTY( sTTYText, FALSE );
 }
@@ -229,8 +345,11 @@ void CUnittestDoc::OnTestDiffandMerge() {
    void TestDiffNMerge();
    TestDiffNMerge();
 }
+//
+/////////////////////////////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////////////////////////////
+//
 void CUnittestDoc::OnUpdateTestFaultSimulation( CCmdUI *pCmdUI ) {
    OnUpdateTestDataAccess( pCmdUI );
 }
@@ -258,30 +377,30 @@ void CUnittestDoc::OnTestFaultSimulation() {
 
    nBusHnd = 0;
    do {
-      if ( OLRXAPI_OK != OlxAPIGetEquipment(TC_BUS, &nBusHnd) ) {
+      if ( OLXAPI_OK != OlxAPIGetEquipment(TC_BUS, &nBusHnd) ) {
          AfxMessageBox( OlxAPIErrorString() );
          return;
       }
-      if ( OLRXAPI_FAILED == OlxAPIDoFault( nBusHnd, nFltConn, dFltOpt, nOutageOpt, nOutageLst, dFltR, dFltX, nClearPrev ) ) {
+      if ( OLXAPI_FAILURE == OlxAPIDoFault( nBusHnd, nFltConn, dFltOpt, nOutageOpt, nOutageLst, dFltR, dFltX, nClearPrev ) ) {
          AfxMessageBox( OlxAPIErrorString() );
          return;
       }
-      if ( OLRXAPI_FAILED == OlxAPIPickFault( SF_FIRST, 1 ) ) {
+      if ( OLXAPI_FAILURE == OlxAPIPickFault( SF_FIRST, 1 ) ) {
          AfxMessageBox( OlxAPIErrorString() );
          return;
       }
       strTTY = OlxAPIFaultDescription( 0 );
       nBrHnd = 0;
-      while ( OLRXAPI_OK == OlxAPIGetBusEquipment( nBusHnd, TC_BRANCH, &nBrHnd ) ) {
-         if ( OLRXAPI_FAILED == OlxAPIGetSCVoltage( nBrHnd, vdOut1, vdOut2, 4 ) ) {
+      while ( OLXAPI_OK == OlxAPIGetBusEquipment( nBusHnd, TC_BRANCH, &nBrHnd ) ) {
+         if ( OLXAPI_FAILURE == OlxAPIGetSCVoltage( nBrHnd, vdOut1, vdOut2, 4 ) ) {
             AfxMessageBox( OlxAPIErrorString() );
             return;
          }
-         if ( OLRXAPI_FAILED == OlxAPIGetSCCurrent( nBrHnd, vdIOut1, vdIOut2, 4 ) ) {
+         if ( OLXAPI_FAILURE == OlxAPIGetSCCurrent( nBrHnd, vdIOut1, vdIOut2, 4 ) ) {
             AfxMessageBox( OlxAPIErrorString() );
             return;
          }
-         if ( OLRXAPI_FAILED == OlxAPIGetData( nBrHnd, BR_nBus2Hnd, &nBus2Hnd ) ) {
+         if ( OLXAPI_FAILURE == OlxAPIGetData( nBrHnd, BR_nBus2Hnd, &nBus2Hnd ) ) {
             AfxMessageBox( OlxAPIErrorString() );
             return;
          }
@@ -308,7 +427,7 @@ void CUnittestDoc::OnTestRun1lPFCmd() {
 
    if ( IDOK != dlg.DoModal() )
       return;
-   if ( OLRXAPI_FAILED == OlxAPIRun1LPFCommand( dlg.m_sInput.GetBuffer() ) ) {
+   if ( OLXAPI_FAILURE == OlxAPIRun1LPFCommand( dlg.m_sInput.GetBuffer() ) ) {
       AfxMessageBox( OlxAPIErrorString() );
       return;
    } else {
@@ -318,6 +437,22 @@ void CUnittestDoc::OnTestRun1lPFCmd() {
 
 void CUnittestDoc::OnUpdateTestRun1LPFCmd( CCmdUI *pCmdUI ) {
    pCmdUI->Enable( TRUE );
+}
+//
+/////////////////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//
+void CUnittestDoc::OnUpdateTestApiCall( CCmdUI *pCmdUI ) {
+   pCmdUI->Enable( TRUE );
+}
+
+void CUnittestDoc::OnTestApiCall() {
+   // Test various API calls
+
+   //void FindObj1LPF_UnitTest();
+   //FindObj1LPF_UnitTest();
+   return;
 }
 //
 /////////////////////////////////////////////////////////////////////////////////////////

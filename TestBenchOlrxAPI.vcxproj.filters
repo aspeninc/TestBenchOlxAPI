@@ -101,5 +101,6 @@
   </ItemGroup>
   <ItemGroup>
     <Library Include="bin\olxapi.lib" />
+    <Library Include="BinV14\OlrxAPI.lib" />
   </ItemGroup>
 </Project>

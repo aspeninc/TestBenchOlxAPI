@@ -57,4 +57,6 @@ public:
    afx_msg void OnTestDiffandMerge();
    afx_msg void OnTestRun1lPFCmd();
    afx_msg void OnUpdateTestRun1LPFCmd( CCmdUI *pCmdUI );
+   afx_msg void OnTestApiCall();
+   afx_msg void OnUpdateTestApiCall( CCmdUI *pCmdUI );
 };

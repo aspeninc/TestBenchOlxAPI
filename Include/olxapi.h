@@ -1,27 +1,22 @@
 /* OlxAPI.h : C header file for the OlxAPI.DLL
-   Copyright (c) 1987-2020 Advanced Systems for Power Engineering, Inc. (ASPEN).
+   Copyright (c) 1987-2022 Advanced Systems for Power Engineering, Inc. (ASPEN).
    All rights reserved. 
 */
 
 #pragma once
 
-// To be shipped with OneLiner V14 only
-#define OLRXAPI_OK                        1
-#define OLRXAPI_FAILED                    0
-#define OLRXAPI_FAILURE                   0
-#define OLRXAPI_DATAFILEANOMALIES         2
-#define OLRXAPI_STATE_UNINITIALIZED       0
-#define OLRXAPI_STATE_INITIALIZED         1
-#define OLRXAPI_STATE_SCRIPTINITIALIZED   2
-///
-#define OLXAPI_OK                        1
-#define OLXAPI_FAILED                    0
-#define OLXAPI_FAILURE                   0
-#define OLXAPI_DATAFILEANOMALIES         2
-#define OLXAPI_STATE_UNINITIALIZED       0
-#define OLXAPI_STATE_INITIALIZED         1
-#define OLXAPI_STATE_SCRIPTINITIALIZED   2
+/** OLXAPI_DBX_VER: data access engine version.
+    Remark: IMPORTANT: this value must match the DBX version entry in the 
+            OlxAPIVersionInfo() string
+*/
+#define OLXAPI_DBX_VER  18
 
+#define OBJ_sGUID 196   // Reserved value. Must not be used elsewhere
+#define OBJ_sTags 197   // Reserved value. Must not be used elsewhere
+#define OBJ_sMemo 198   // Reserved value. Must not be used elsewhere
+#define OBJ_sUDF  199   // Reserved value. Must not be used elsewhere
+
+//
 // Object type codes
 #define TC_NOTHING 0
 #define TC_BUS 1
@@ -62,16 +57,20 @@
 #define TC_CCGEN 33
 #define TC_RLYD 34
 #define TC_RLYV 35
-#define TC_PILOT 36
-#define TC_ZCORRECT 37
-#define TC_BLOB 38
-#define TC_DCLINE2 39
-#define TC_LINEKINK 40
-#define TC_RLYLINK 41
-#define TC_LTC 42
-#define TC_LTC3 43
-#define TC_SETTINGS 44
-#define TC_COUNT 44
+#define TC_ZCORRECT 36
+#define TC_BLOB 37
+#define TC_DCLINE2 38
+#define TC_LINEKINK 39
+#define TC_RLYLINK 40
+#define TC_LTC 41
+#define TC_LTC3 42
+#define TC_SETTINGS 43
+#define TC_OLROPT 44
+#define TC_IED 45
+#define TC_GENW3 46
+#define TC_GENW4 47
+#define TC_ADXPROJECT 48
+#define TC_COUNT 49
 #define TC_PICKED 100
 #define TC_PICKED1 100
 #define TC_PICKED2 101
@@ -109,6 +108,8 @@
 #define LU_sID 110
 #define LU_sOnDate 111
 #define LU_sOffDate 112
+#define SV_sOnDate 113
+#define SV_sOffDate 114
 #define BUS_dKVnominal 201
 #define BUS_dKVP 202
 #define BUS_dAngleP 203
@@ -160,21 +161,24 @@
 #define GE_nBusHnd 314
 #define GU_nOnline 315
 #define GU_nGenHnd 316
-#define GU_vdR 503
-#define GU_vdX 504
 #define SV_nActive 316
 #define SV_nCtrlBusHnd 317
 #define SV_nCtrlMode 318
 #define SV_vnNoStep 619
 #define SV_nBusHnd 320
 #define SH_nBusHnd 321
+#define SH_nActive 322
 #define SU_nOnline 322
-#define SU_nShuntHnd 323
 #define SU_n3WX 323
+#define SU_nShuntHnd 324
 #define LU_nOnline 324
 #define LU_nLoadHnd 325
+#define LD_nUnGrounded 326
+#define BUS_nXfmrMidPoint 327
 #define LU_vdMW 501
 #define LU_vdMVAR 502
+#define GU_vdR 503
+#define GU_vdX 504
 #define SV_vdBinc 505
 #define SV_vdB0inc 506
 #define BR_nType 301
@@ -187,6 +191,7 @@
 #define BR_nRlyGrp3Hnd 308
 #define BR_nInService 309
 #define SY_sFComment 101
+#define SY_sUDFTemplate 102
 #define SY_dBaseMVA 202
 #define SY_nNObus 303
 #define SY_nNOgen 304
@@ -197,8 +202,8 @@
 #define SY_nNOxfmr 309
 #define SY_nNOxfmr3 310
 #define SY_nNOps 311
-#define SY_nNOmutual  312
-#define SY_nNOswitch  313,
+#define SY_nNOmutual 312
+#define SY_nNOswitch 313
 #define SY_nNOloadUnit 314
 #define SY_nNOsvd 315
 #define SY_nNOrlyOCP 316
@@ -215,6 +220,18 @@
 #define SY_nNObreaker 327
 #define SY_nNOscheme 328
 #define SY_nNOIED 329
+#define SY_nNODCLine2 330
+#define SY_nNOgenUnit 331
+#define SY_nNOgenW3 332
+#define SY_nNOgenW4 333
+#define SY_nNOarea 334
+#define SY_nNOzone 335
+#define SY_nNOrlyGroup 336
+#define SY_nNOltc 337
+#define SY_nNOltc3 338
+#define SY_nNOmuPair 339
+#define SY_nNOzCorrect 340
+#define SY_vParams 401
 #define LN_sName 101
 #define LN_sID 102
 #define LN_sLengthUnit 103
@@ -234,13 +251,38 @@
 #define LN_dG20 211
 #define LN_dB20 212
 #define LN_dLength 213
+#define LN_dI2T 214
 #define LN_nBus1Hnd 301
 #define LN_nBus2Hnd 302
 #define LN_nRlyGr1Hnd 303
 #define LN_nRlyGr2Hnd 304
 #define LN_nInService 305
 #define LN_nMuPairHnd 306
+#define LN_nMeteredEnd 307
 #define LN_vdRating 501
+#define DC_sName 101
+#define DC_sID 102
+#define DC_sOnDate 103
+#define DC_sOffDate 104
+#define DC_dControlTarget 201
+#define DC_dControlMargin 202
+#define DC_dVdcSched 203
+#define DC_dDClineR 204
+#define DC_nInService 301
+#define DC_nBus1Hnd 302
+#define DC_nBus2Hnd 303
+#define DC_nMeteredEnd 304
+#define DC_vdAngleMax 501
+#define DC_vdAngleMin 502
+#define DC_vdTapMax 503
+#define DC_vdTapMin 504
+#define DC_vdTapStepSize 505
+#define DC_vdTapRatio 506
+#define DC_vdMVA 507
+#define DC_vdNomKV 508
+#define DC_vdXfmrR 509
+#define DC_vdXfmrX 510
+#define DC_vnBridges 601
 #define XR_sName 101
 #define XR_sID 102
 #define XR_sCfgP 103
@@ -289,7 +331,7 @@
 #define XR_nBus1Hnd 301
 #define XR_nBus2Hnd 302
 #define XR_nLTCCtrlBusHnd 303
-#define XR_nMetered 304
+#define XR_nMeteredEnd 304
 #define XR_nInService 305
 #define XR_nLTCside 306
 #define XR_nLTCtype 307
@@ -361,34 +403,56 @@
 #define X3_nRlyGr3Hnd 309
 #define X3_nLTCPriority 310
 #define X3_nLTCGanged 311
-#define XR3_nLTCCtrlBusHnd 312
+#define X3_nLTCCtrlBusHnd 312
+#define X3_nLTCside 313
+#define X3_nLTCtype 314
 #define PS_sName 101
 #define PS_sID 102
 #define PS_sOnDate 103
 #define PS_sOffDate 104
 #define PS_dAngle 201
+#define PS_dRP 202
 #define PS_dR 202
+#define PS_dXP 203
 #define PS_dX 203
-#define PS_dB 204
-#define PS_dR0 205
-#define PS_dX0 206
-#define PS_dB0 207
+#define PS_dGP1 204
+#define PS_dBP1 205
+#define PS_dB 205
+#define PS_dGP2 206
+#define PS_dBP2 207
+#define PS_dRN 208
 #define PS_dR2 208
+#define PS_dXN 209
 #define PS_dX2 209
-#define PS_dB2 210
-#define PS_dAngleMax 211
-#define PS_dAngleMin 212
-#define PS_dMWmax 213
-#define PS_dMWmin 214
-#define PS_dMVA1 215
-#define PS_dMVA2 216
-#define PS_dMVA3 217
-#define PS_nInService 318
-#define PS_nBus1Hnd 319
-#define PS_nBus2Hnd 320
-#define PS_nControlMode 321
-#define PS_nRlyGr1Hnd 322
-#define PS_nRlyGr2Hnd 323
+#define PS_dGN1 210
+#define PS_dBN1 211
+#define PS_dB2 211
+#define PS_dGN2 212
+#define PS_dBN2 213
+#define PS_dRZ 214
+#define PS_dR0 214
+#define PS_dXZ 215
+#define PS_dX0 215
+#define PS_dGZ1 216
+#define PS_dBZ1 217
+#define PS_dB0 217
+#define PS_dGZ2 218
+#define PS_dBZ2 219
+#define PS_dAngleMax 220
+#define PS_dAngleMin 221
+#define PS_dMWmax 222
+#define PS_dMWmin 223
+#define PS_dMVA1 224
+#define PS_dMVA2 225
+#define PS_dMVA3 226
+#define PS_dBaseMVA 227
+#define PS_nInService 328
+#define PS_nBus1Hnd 329
+#define PS_nBus2Hnd 330
+#define PS_nControlMode 331
+#define PS_nRlyGr1Hnd 332
+#define PS_nRlyGr2Hnd 333
+#define PS_nZCorrectNO 334
 #define SC_sName 101
 #define SC_sID 102
 #define SC_sOnDate 103
@@ -430,6 +494,8 @@
 #define RG_nReclLogicHnd 307
 #define RG_nOps 308
 #define RG_vdRecloseInt 501
+#define RG_vnPrimaryGroup 601
+#define RG_vnBackupGroup 602
 #define OG_sID 101
 #define OG_sAssetID 102
 #define OG_sType 103
@@ -445,6 +511,16 @@
 #define FS_sType 113
 #define FS_sComment 114
 #define FS_sLibrary 115
+#define OG_sOnDate 116
+#define OG_sOffDate 117
+#define OP_sOnDate 118
+#define OP_sOffDate 119
+#define FS_sOnDate 120
+#define FS_sOffDate 121
+#define OG_sTapType 122
+#define OP_sTapType 123
+#define OG_sParam 124
+#define OP_sParam 125
 #define OG_dCT 201
 #define OG_dTap 202
 #define OG_dTDial 203
@@ -466,6 +542,11 @@
 #define OP_dTimeMult2 219
 #define OP_dVCtrlRestPcnt 220
 #define OP_dResetTime 221
+#define FS_dCT 222
+#define FS_dTimeMult 223
+#define FS_dRating 224
+#define OP_dMinTripTime 225
+#define OG_dMinTripTime 226
 #define OP_nRlyGrHnd 301
 #define OG_nRlyGrHnd 302
 #define OG_nInService 303
@@ -475,20 +556,37 @@
 #define OG_nFlatDelay 307
 #define OG_nDCOffset 308
 #define OG_nSignalOnly 309
-#define OP_nInService 310
-#define OP_nDirectional 311
-#define OP_nIDirectional 312
-#define OP_nPolar 313
-#define OP_nByCTConnect 314
-#define OP_nFlatDelay 315
-#define OP_nDCOffset 316
-#define OP_nSignalOnly 317
-#define OP_nVoltControl 318
-#define FS_nRlyGrHnd 319
-#define FS_nInService 320
-#define FS_nCurve 321
+#define OG_nPackage 310
+#define OP_nInService 311
+#define OP_nDirectional 312
+#define OP_nIDirectional 313
+#define OP_nPolar 314
+#define OP_nByCTConnect 315
+#define OP_nFlatDelay 316
+#define OP_nDCOffset 317
+#define OP_nSignalOnly 318
+#define OP_nVoltControl 319
+#define OP_nPackage 320
+#define FS_nRlyGrHnd 321
+#define FS_nInService 322
+#define FS_nCurve 323
+#define FS_nPackage 324
+#define OG_nOperateOn 325
+#define OG_nCTLocation 326
+#define OG_nParamCount 327
+#define OP_nParamCount 328
+#define OG_vParamLabels 401
+#define OP_vParamLabels 402
+#define OG_vParams 403
+#define OP_vParams 404
 #define OG_vdDirSetting 501
 #define OP_vdDirSetting 502
+#define OG_vdDTPickup 503
+#define OP_vdDTPickup 504
+#define OG_vdDTDelay 505
+#define OP_vdDTDelay 506
+#define OG_vdDirSettingV15 507
+#define OP_vdDirSettingV15 508
 #define DG_sID 101
 #define DG_sAssetID 102
 #define DG_sType 103
@@ -503,6 +601,12 @@
 #define DP_sComment 112
 #define DP_sLibrary 113
 #define DP_sParam 114
+#define DG_sOnDate 115
+#define DG_sOffDate 116
+#define DP_sOnDate 117
+#define DP_sOffDate 118
+#define DP_sZ2OCCurve 119
+#define DG_sZ2OCCurve 120
 #define DG_dCT 201
 #define DG_dVT 202
 #define DG_dKmag 203
@@ -511,14 +615,24 @@
 #define DP_dCT 206
 #define DP_dVT 207
 #define DP_dMinI 208
+#define DP_dZ2OCTD 209
+#define DG_dZ2OCTD 210
+#define DP_dZ2OCPickup 211
+#define DG_dZ2OCPickup 212
+#define DG_dKangEx 213
+#define DG_dKmagEx 214
 #define DG_nInService 301
 #define DG_nRlyGrHnd 302
 #define DG_nParamCount 303
 #define DG_nSignalOnly 304
-#define DP_nInService 305
-#define DP_nRlyGrHnd 306
-#define DP_nParamCount 307
-#define DP_nSignalOnly 308
+#define DG_nPackage 305
+#define DP_nInService 306
+#define DP_nRlyGrHnd 307
+#define DP_nParamCount 308
+#define DP_nSignalOnly 309
+#define DP_nPackage 310
+#define DP_nVTBus 311
+#define DG_nVTBus 312
 #define DG_vdParams 501
 #define DG_vParams 402
 #define DG_vParamLabels 403
@@ -543,6 +657,10 @@
 #define CG_sTypeSlow 110
 #define CG_sComment 111
 #define CG_sLibrary 112
+#define CP_sOnDate 113
+#define CP_sOffDate 114
+#define CG_sOnDate 115
+#define CG_sOffDate 116
 #define CP_dPickupF 201
 #define CP_dPickupS 202
 #define CP_dTimeAddF 203
@@ -571,6 +689,8 @@
 #define CG_dRecIntvl2 226
 #define CG_dRecIntvl3 227
 #define CG_dIntrTime 228
+#define CP_dRating 229
+#define CG_dRating 230
 #define CP_nInService 301
 #define CP_nTotalOps 302
 #define CP_nFastOps 303
@@ -616,6 +736,8 @@
 #define CC_dVmin 203
 #define CC_nVloc 301
 #define CC_nInService 302
+#define CC_nBusHnd 303
+#define CC_nBlockOnPhaseV 304
 #define CC_vdV 501
 #define CC_vdI 502
 #define CC_vdAng 503
@@ -628,6 +750,10 @@
 #define RV_sAssetID 107
 #define RV_sOVCurve 108
 #define RV_sUVCurve 109
+#define RD_sOnDate 110
+#define RD_sOffDate 111
+#define RV_sOnDate 112
+#define RV_sOffDate 113
 #define RD_dCTR1 201
 #define RD_dPickupPh 202
 #define RD_dPickup3I0 203
@@ -683,76 +809,548 @@
 #define LS_sScheme 103
 #define LS_sEquation 104
 #define LS_sVariables 105
+#define LS_sOnDate 106
+#define LS_sOffDate 107
 #define LS_nSignalOnly 301
 #define LS_nInService 302
 #define LS_nRlyGrpHnd 303
+#define LS_vsSignalName 401
+#define LS_vdSignalVar 501
+#define LS_vnSignalType 601
+#define G3_sOnDate 101
+#define G3_sOffDate 102
+#define G3_dUnitRatedMVA 201
+#define G3_dUnitRatedMW 202
+#define G3_dUnitMW 203
+#define G3_dImaxRsc 204
+#define G3_dImaxGsc 205
+#define G3_dMaxV 206
+#define G3_dMinV 207
+#define G3_dRr 208
+#define G3_dLlr 209
+#define G3_dRs 210
+#define G3_dLls 211
+#define G3_dLm 212
+#define G3_dSlipRated 213
+#define G3_dZfilter 214
+#define G3_nInService 301
+#define G3_nNOUnits 302
+#define G3_nCrowbared 303
+#define G3_nBusHnd 304
+#define G4_sOnDate 101
+#define G4_sOffDate 102
+#define G4_dUnitRatedMVA 201
+#define G4_dUnitMW 202
+#define G4_dVlow 203
+#define G4_dMaxI 204
+#define G4_dMaxIlow 205
+#define G4_dUnitMVAR 206
+#define G4_dSlopePos 207
+#define G4_dSlopeNeg 208
+#define G4_dMaxV 209
+#define G4_dMinV 210
+#define G4_nInService 301
+#define G4_nNOUnits 302
+#define G4_nControlMethod 303
+#define G4_nBusHnd 304
 
 #define SF_LAST -1
 #define SF_NEXT -2
 #define SF_FIRST 1
 #define SF_PREV -4
 
-// API functions declarations; To be shipped with OneLiner V14 only
-int __stdcall OlrxAPIBoundaryEquivalent( char *szEquFileName, int *nBusList, double *dFltOpt );
-int __stdcall OlrxAPIComputeRelayTime( int nRelayHnd,
-   double *dCurMag, double *dCurAng,   // 3 phases plus two neutral currents
-   double *dVMag, double *dVAng,       // 3 phases voltages
+#ifndef MXUDFNAME
+#define MXUDFLABEL 24 // Size of User defined field label
+#endif
+#ifndef MXUDF
+#define MXUDF  64     // Size of User defined field value
+#endif
+#ifndef MXUDFNAME
+#define MXUDFNAME 16  // Size of User defined field name
+#endif
+
+#define OLXAPI_OK                        1
+#define OLXAPI_FAILED                    0
+#define OLXAPI_FAILURE                   0
+#define OLXAPI_DATAFILEANOMALIES         2
+#define OLXAPI_STATE_UNINITIALIZED       0
+#define OLXAPI_STATE_INITIALIZED         1     // OlxAPI dll is active
+
+#define pszPSTTYLogFileName "PowerScriptTTYLog.txt"
+
+#define SETDATABUFLEN_DOUBLE 99
+#define GETDATABUFLEN        (10*1024)
+
+// Logic variable types
+#define LVT_OC_DT   101  // Assert on INST as well as any DTx
+                        //  Used to be called LVT_OC_INST in v14 and earlier. 
+#define LVT_OC_TOC  102
+#define LVT_OC_DT1  103
+#define LVT_OC_DT2  104
+#define LVT_OC_DT3  105
+#define LVT_OC_DT4  106
+#define LVT_OC_DT5  107
+#define LVT_OC_INSTV15  108  // New in v15. Assert on INST only
+#define LVT_OC_DTTRIP   111  // Assert on INST as well as any DTx
+                             //  Used to be called LVT_OC_INSTTRIP in v14 and earlier. 
+#define LVT_OC_TOCTRIP  112
+#define LVT_OC_DTTRIP1  113
+#define LVT_OC_DTTRIP2  114
+#define LVT_OC_DTTRIP3  115
+#define LVT_OC_DTTRIP4  116
+#define LVT_OC_DTTRIP5  117
+#define LVT_DS_ZONE1      201
+#define LVT_DS_ZONETRIP1  211
+#define LVT_DS_ZONE2      202
+#define LVT_DS_ZONETRIP2  212
+#define LVT_DS_ZONE3      203
+#define LVT_DS_ZONETRIP3  213
+#define LVT_DS_ZONE4      204
+#define LVT_DS_ZONETRIP4  214
+#define LVT_DS_ZONE5      205
+#define LVT_DS_ZONETRIP5  215
+#define LVT_DS_ZONE6      206
+#define LVT_DS_ZONETRIP6  216
+#define LVT_OVI  301
+#define LVT_OVT  302
+#define LVT_UVI  303
+#define LVT_UVT  304
+#define LVT_OVITRIP  311
+#define LVT_OVTTRIP  312
+#define LVT_UVITRIP  313
+#define LVT_UVTTRIP  314
+#define LVT_DIFF     401
+#define LVT_DIFFPH   402
+#define LVT_DIFF3I0  403
+#define LVT_DIFF3I2  404
+#define LVT_DIFFTRIP 410
+#define LVT_SCHEME   501
+#define LVT_R_OP  1001
+#define LVT_R_OP1 1002
+#define LVT_R_OP2 1003
+#define LVT_R_OP3 1004
+#define LVT_R_OPL 1005
+#define LVT_R_C   1006
+#define LVT_R_C1  1007
+#define LVT_R_C2  1008
+#define LVT_R_C3  1009
+#define LVT_F_INTERNAL  1020
+#define LVT_F_EXTERNAL  1030
+#define LVT_CONST     1040
+
+
+// GFX OPs. Internal use
+#define GFX_ROTATEBUS 1
+#define GFX_DOTBUS    2
+#define GFX_VBARBUS   3
+#define GFX_HBARBUS   4
+#define GFX_PLACEBUS  5
+#define GFX_SHOWBUS   6
+#define GFX_HIDEBUS   7
+#define GFX_PLACEBRANCH  8
+#define GFX_REGION 9
+////
+
+// OLGFX OPs.
+#define OLGFX_GETDATA   1005
+#define OLGFX_PLACEBUS  1010
+
+
+///////////////////////////////////////////////////////////////////////////////
+// API functions declarations
+
+int __stdcall OlxAPIInitialize();
+int __stdcall OlxAPITerminate();
+
+/** OlxAPIAddEquipment: Add a new bus or a new piece of equipment to the network
+   Parameters:     
+      nTC       [in] Equpipment type code
+      pTokens   [in] Array of parameter codes
+      pParams   [in] Array of ponters to parameter values
+   Return value: 
+      hnd       handle number of the new object
+      0         failure
+   Remarks: None
+*/
+int __stdcall OlxAPIAddEquipment( int nTC, int *pTokens, LPVOID *pParams );
+
+/** OlrxAPICreatNetwork: Create a new network
+   Parameters:     
+      dBaseMVA  [in] Base MVA
+   Return value: 
+      OLXAPI_FAILURE: Failure
+      OLXAPI_OK     : Success
+   Remarks: This operation will invalidate all existing object handles
+*/
+int __stdcall OlxAPICreateNetwork( double dBaseMVA );
+
+/** OlxAPIAddDevice: Add a new protective device in a relay group on a line,
+       switch or transformer branch
+   Parameters:     
+      nTC       [in] Device type code.
+      nBrHnd    [in] Handle number of a line, transformer, branch or relay group
+      nBrEnd    [in] Index number of the line or transformer terminal: 
+                     0- Bus1 side; 1- Bus2 side; 2- Bus3 side
+      pTokens   [in] Array of parameter codes
+      pParams   [in] Array of ponters to parameter values
+   Return value: 
+      hnd       handle number of the new object
+      0         failure
+   Remarks: None
+*/
+int __stdcall OlxAPIAddDevice( int nTC, int nBrHnd, int nBrEnd, int *pTokens, LPVOID *pParams );
+
+int __stdcall OlxAPIBoundaryEquivalent( char *szEquFileName, int *nBusList, double *dFltOpt );
+
+/** OlxAPICloseDataFile: Close the network data file that had been loaded previously 
+      with a call to OlxAPILoadDataFile()
+   Return value: 
+      1               success
+      0               failure
+   Remarks: None
+*/
+int __stdcall OlxAPICloseDataFile();
+
+/** OlxAPIComputeRelayTime:  Computes operating time for a fuse, recloser, an overcurrent relay 
+     (phase or ground), or a distance relay (phase or ground) at given currents and voltages.
+   Parameters:     
+      nHandle       [in] relay handle
+      vdCurMag()    [in] array of relay current magnitude in:  phase A, B, C and if applicable 
+                         Io currents in neutral of transformer windings P and S.
+      vdCurAng()    [in] array of relay current angles
+      vdVMag()      [in] array of relay voltage magnitude in phase A, B and C
+      vdVAng()      [in] array of relay voltage angle
+      dVpreMag      [in] relay pre-fault positive sequence voltage magnitude
+      dVpreAng      [in] relay pre-fault positive sequence voltage angle
+      dTime         [out] relay operating time in seconds
+      sDevice       [out] relay operation code:
+                     NOP  No operation
+                     ZGn  Ground distance zone n  tripped
+                     ZPn  Phase distance zone n  tripped
+                     Ix   Overcurrent relay operating quantity: Ia, Ib, Ic, Io, I2, 3Io, 3I2
+   Return value: 
+      1               success
+      0               failure
+   Remarks: 
+
+*/
+int __stdcall OlxAPIComputeRelayTime( int nRelayHnd,
+   double *dCurMag, double *dCurAng,
+   double *dVMag, double *dVAng,
    double dVpreMag, double dVpreAng,
    double *pTime, char *szDevice );
-int __stdcall OlrxAPIDeleteEquipment( int nDeviceHnd );
-int __stdcall OlrxAPIDoBreakerRating(
-   int* nScope,         //[1]: 0-IEEE;1-IEC
-                        //[2]: 0-All;1-Area;2-Zone;3-Selected
-                        //[3]: Area or zone number
-                        //...: or list of bus hnd terminated with -1
-   double dThreshold,   // Rating threshold
-   double dOutputOpt,   // 0.0- all; 1.0-Overduty only; else- screening threshold
-   int nOptionalReport, // Bit1-Detailed sim result; Bit2-Name plate data; 
-                        // Bit3-Conn equipment list
-   char* szReportTXT,
-   char* szReportCSV,
-   char* szConfigFile );
-int __stdcall OlrxAPIDoFault( int nDevHnd, int *nFltConn,
+
+int __stdcall OlxAPIDeleteEquipment( int nDeviceHnd );
+
+/** OlxAPIDoBreakerRating: Run circuit breaker rating check.
+   Parameters:
+     nScope        [in] Scope flag
+                          1    0-IEEE;1-IEC
+                          2    0-All;1-Area;2-Zone;3-Selected
+                          3    Area or zone number
+                          ...  or list of bus hnd terminated with -1
+     dThreshold   [in] Rating threshold
+     dOutputOpt   [in] Report option
+                         0.0   All checked breakers
+                         1.0   Overduty breakers only
+                         else  screening threshold
+     nOptionalReport [in] Optional report option flag
+                         Bit1-Detailed sim result;
+                         Bit2-Name plate data; 
+                         Bit3-Conn equipment list
+     szReportTXT   [in] Text report path name. NULL to omit.
+     szReportCSV   [in] CSV report path name. NULL to omit.
+     szConfigFile  [in] checking config file path name. NULL to omit.
+*/
+int __stdcall OlxAPIDoBreakerRating( int* nScope, double dThreshold, double dOutputOpt, 
+   int nOptionalReport, char* szReportTXT, char* szReportCSV, char* szConfigFile );
+
+int __stdcall OlxAPIDoFault( int nDevHnd, int *nFltConn,
    double *dFltOpt, int *nOutageOpt, int *nOutageLst,
    double dFltR, double dFltX, int nFlag );
-int __stdcall OlrxAPIDoSteppedEvent( int nDevHnd, double *dFltOpt, int *nDevOpt, long nTiers );
-int __stdcall OlrxAPIEquipmentType( int nDevHnd );
-const char* __stdcall OlrxAPIErrorString();
-const char* __stdcall OlrxAPIFaultDescription( int nFltIdx );
-int __stdcall OlrxAPIFindBusByName( const char* pszBusName, double dKV, int* pDeviceHnd );
-int __stdcall OlrxAPIFindBusByName( const char* pszBusName, double dKV, int* pDeviceHnd );
-int __stdcall OlrxAPIFindBusNo( int nBusNo );
-int __stdcall OlrxAPIFindEquipmentByTag( char *szTags, int nDevType, int *pnHnd );
-const char* __stdcall OlrxAPIFullBranchName( int nBranchHnd );
-const char* __stdcall OlrxAPIFullBusName( int nBusHnd );
-const char* __stdcall OlrxAPIFullRelayName( int nRelayHnd );
-int __stdcall OlrxAPIGetBusEquipment( int nBusHnd, int nType, int* pDeviceHnd );
-int __stdcall OlrxAPIGetData( int nDeviceHnd, int nParam, void *pOutput );
-int __stdcall OlrxAPIGetEquipment( int nType, int *pDeviceHnd );
-int __stdcall OlrxAPIGetLogicScheme( int nRlyGrHnd, long * pSchemeHnd );
-int __stdcall OlrxAPIGetRelay( int nRlyGrHnd, int *pRelayHnd );
-const char* __stdcall OlrxAPIGetObjJournalRecord( int nDeviceHnd );
-const char* __stdcall OlrxAPIGetObjMemo( int nDeviceHnd );
-const char* __stdcall OlrxAPIGetObjTags( int nDeviceHnd );
-const char* __stdcall OlrxAPIGetOlrFileName();
-int __stdcall OlrxAPIGetPSCVoltage( int nDeviceHnd, double *dOut1, double *dOut2, int nStyle );
-int __stdcall OlrxAPIGetRelay( int nHndRlyGroup, int* nHndRelay );
-int __stdcall OlrxAPIGetRelayTime( int nRelayHnd, double dFactor, double *pTime, char* szDevice, int nTripOnly );
-int __stdcall OlrxAPIGetSCCurrent( int nDeviceHnd, double *dOut1, double *dOut2, int nStyle );
-int __stdcall OlrxAPIGetSCVoltage( int nDeviceHnd, double *dOut1, double *dOut2, int nStyle );
-int __stdcall OlrxAPIGetSteppedEvent( int nStep, double *dTime, double *dCurrent,
+
+/** OlxAPIDoSteppedEvent: Run stepped-event simulation
+
+   Parameters:
+      hnd:  handle of a bus or a relay group.
+      fltOpt: simulation options
+         fltOpt(1) - Fault connection code
+                           1=3LG
+                           2=2LG BC, 3=2LG CA, 4=2LG AB
+                           5=1LG A, 5=1LG B, 6=1LG C
+                           7=LL BC, 7=LL CA, 8=LL AB
+         fltOpt(2) - Intermediate percent between 0.01-99.99. 0 for a
+                     close-in fault. This parameter is ignored if nDevHnd
+                     is a bus handle.
+         fltOpt(3) - Fault resistance, ohm
+         fltOpt(4) - Fault reactance, ohm
+         fltOpt(4+1) - Zero or Fault connection code for additional user event
+         fltOpt(4+2) - Time  of additional user event, seconds.
+         fltOpt(4+3) - Fault resistance in additional user event, ohm
+         fltOpt(4+4) - Fault reactance in additional user event, ohm
+         fltOpt(4+5) - Zero or Fault connection code for additional user event
+      ...
+      runOpt: simulation options flags. 1 - set; 0 - reset
+         runOpt(1)  - Consider OCGnd operations
+         runOpt(2)  - Consider OCPh operations
+         runOpt(3)  - Consider DSGnd operations
+         runOpt(4)  - Consider DSPh operations
+         runOpt(5)  - Consider Protection scheme operations
+         runOpt(6)  - Consider Voltage relay operations
+         runOpt(7)  - Consider Differential relay operations
+      nTiers: Study extent. Take into account protective devices located within this number
+              of tiers only.
+
+   Returns:
+      OLXAPI_FAILURE: Failure
+      OLXAPI_OK     : Success
+
+   Remarks:
+      After successful call to OlxAPIDoSteppedEvent() you must call
+      the function GetSteppedEvent() to retrieve detailed results of
+      each step in the simulation.
+
+      To retrieve the fault simulation results at a network element
+      in each event, call PickFault() with the event index then use
+      GetSCCurrent(), GetSCVoltage() and GetRelayOperation() functions
+      accordingly.
+      
+*/
+int __stdcall OlxAPIDoSteppedEvent( int hnd, double *fltOpt, int *runOpt, long nTiers );
+int __stdcall OlxAPIEquipmentType( int nDevHnd );
+const char* __stdcall OlxAPIErrorString();
+
+/** OlxAPIFaultDescriptionEx: Return description string of a fault in the simulation results buffer.
+   Parameters:
+      nFltIdx   Index number of fault case.
+      nOpt      Output flag:
+                   [0] Fault description string only
+                   1   Plus FLTSPCVS on the last line
+                   2   Plus FLTOPTSTR on the last line
+                   See SIMULATEFAULT for details of FLTSPCVS and FLTOPTSTR
+*/
+const char* __stdcall OlxAPIFaultDescriptionEx( int nFltIdx, int nOpt ); 
+const char* __stdcall OlxAPIFaultDescription( int nFltIdx );
+
+/** OlxAPIFindBus: Return handle number of the bus with given name and  nominal kV.
+   Parameters:
+      szName   Bus name.
+      dKV      Bus nominal kV
+   Return value: 
+      0               Failure
+      n               Bus handle number
+*/
+int __stdcall OlxAPIFindBus( char *szName, double dKV );
+
+int __stdcall OlxAPIFindBusByName( const char* pszBusName, double dKV, int* pDeviceHnd );
+int __stdcall OlxAPIFindBusNo( int nBusNo );
+int __stdcall OlxAPIFindEquipmentByTag( char *szTags, int nDevType, int *pnHnd );
+
+/** OlxAPIFindObj1LPF: Returns handle number of the object in the pszObj1LPF string 
+   Parameters:
+      pszObj1LPF   [in] Object ID string produced by the PrintObj1LPF() or
+                        Object GUID string
+      pDeviceHnd   [out] Object handle number.
+   Return value: 
+      0               Failure
+      1               Success
+*/
+int __stdcall OlxAPIFindObj1LPF( const char* pszObj1LPF, int* pDeviceHnd );
+
+/** OlxAPIFindObj1LPFEx: Returns handle number of the object in the pszObj1LPF string 
+   Parameters:
+      pszObj1LPF   [in] Object ID string produced by the PrintObj1LPF() or
+                        Object GUID string
+      pDeviceHnd   [out] Object handle number.
+      pFlag        [out] Line ends and mutual pair match flag. Bit array of
+                         1- Found line 1 with ends swapped
+                         2- Found line 2 with ends swapped
+                         3- Found pair with line 1/2 swapped
+   Return value: 
+      0               Failure
+      1               Success
+*/
+int __stdcall OlxAPIFindObj1LPFEx( const char* pszObj1LPF, int* pDeviceHnd, int *pFlag );
+
+
+#ifndef GUID_DEFINED
+#define GUID_DEFINED
+typedef struct _GUID {
+    unsigned long  Data1;
+    unsigned short Data2;
+    unsigned short Data3;
+    unsigned char  Data4[ 8 ];
+} GUID;
+#endif
+
+/** OlxAPIFindObjByGUID: Returns handle number of the object in with given GUID
+   Parameters:
+      xGUID        [in] Object GUID
+      pDeviceHnd   [out] Object handle number.
+   Return value: 
+      0               Failure
+      1               Success
+*/
+int __stdcall OlxAPIFindObjByGUID( GUID xGUID, int* pDeviceHnd );
+
+const char* __stdcall OlxAPIFullBranchName( int nBranchHnd );
+const char* __stdcall OlxAPIFullBusName( int nBusHnd );
+const char* __stdcall OlxAPIFullRelayName( int nRelayHnd );
+int __stdcall OlxAPIGetBusEquipment( int nBusHnd, int nType, int* pDeviceHnd );
+
+/** OlxAPIGetData: Get object data field
+    Args:
+        hnd         [in] Object handle
+        token       [in] field token
+        dataBuf     [in/out] data buffer
+    Returns:
+        OLXAPI_FAILURE: Failure
+        OLXAPI_OK     : Success
+    Remarks: buffer size of GETDATABUFLEN is required to retrieve array data from some object,
+        such as DG_vParamLabels. The data are encoded in the buffer based on the token value 
+        as follows:
+      100 <= token < 200: char* (cstring)
+      200 <= token < 300: double*
+      300 <= token < 400: char* (tab delimited cstring)
+      500 <= token < 600: double[255]
+      600 <= token < 700: int[255]
+*/
+int __stdcall OlxAPIGetData( int hnd, int token, void *dataBuf );
+
+int __stdcall OlxAPIGetEquipment( int nType, int *pDeviceHnd );
+int __stdcall OlxAPIGetLogicScheme( int nRlyGrHnd, long * pSchemeHnd );
+int __stdcall OlxAPIGetRelay( int nRlyGrHnd, int *pRelayHnd );
+/** OlxAPIGetObjGraphicData: Retrieve object graphic data.
+
+    Args:
+        hnd: object handle
+        buf: output buffer for graphic data. Must be 500 or longer
+
+    Returns:
+        OLXAPI_FAILURE: Failure
+        Size          : Success, size of graphic data record placed in the buffer
+
+    Remarks: Object graphic data record structure
+        TC_BUS: x,y,size,angle,nameX,nameX,hideID
+                !!! when size is Zero, the bus had never been placed on the 1-line and
+                      therefore the rest of the data are junk
+                    when size is negative, the bus is not displayed on the 1-line (hidden)
+        TC_GEN, TC_GENW3, TC_GENW4, TC_CCGEN, TC_LOAD, TC_SHUNT, TC_SVD:
+                x|y,angle,textX,textY
+        TC_XFMR, TC_PS, TC_SCAP, TC_SWITCH, TC_DCLINE2:
+                noSegs,p1X,p1Y,p2X,p2Y,p3X,p3Y,p4X,p4Y,text1X,text1Y,text2X,text2Y
+                !!! noSegs determines if p3 and p4 are being used
+        TC_XFMR3: noSegs,p1X,p1Y,p2X,p2Y,p3X,p3Y,p4X,p4Y,p5X,p5Y,p6X,p6Y,
+                  text1X,text1Y,text2X,text2Y,text3X,text3Y
+                !!! noSegs determines if p3 and p4 are being used
+        TC_LINE, TC_SCAP: noSegs,p1X,p2X....,text1X,text1Y,text2X,text2Y
+*/
+int __stdcall OlxAPIGetObjGraphicData( int nHandle, int *buf );
+const char* __stdcall OlxAPIGetObjJournalRecord( int nDeviceHnd );
+const char* __stdcall OlxAPIGetObjMemo( int nDeviceHnd );
+const char* __stdcall OlxAPIGetObjTags( int nDeviceHnd );
+const char* __stdcall OlxAPIGetOlrFileName();
+int __stdcall OlxAPIGetPSCVoltage( int nDeviceHnd, double *dOut1, double *dOut2, int nStyle );
+
+/** OlxAPIGetRelayTime: Retrieve operating time for a fuse, an overcurrent relay
+    (phase or ground), recloser (phase or ground), or a distance relay (phase or ground)
+    in fault simulation result.
+
+    Args:
+        nRelayHnd: [in] relay object handle
+        dFactor:   [in] relay current multiplying factor
+        nTripOnly: [in] Consider relay element signal-only flag
+                        1 - Yes; 0 - No
+        pTime:    [out] relay operating time in seconds
+        szOp:     [out] relay operation text string. Required buffer size 128 bytes.
+                     NOP  No operation.
+                     ZGn  Ground distance zone n tripped.
+                     ZPn  Phase distance zone n tripped.
+                     TOC=value Time overcurrent element operating quantity in secondary amps
+                     IOC=value Instantaneous overcurrent element operating quantity in secondary amps
+    Returns:
+        OLXAPI_FAILURE: Failure
+        OLXAPI_OK     : Success
+*/
+int __stdcall OlxAPIGetRelayTime( int nRelayHnd, double dFactor, double *pTime, char* szDevice, int nTripOnly );
+
+int __stdcall OlxAPIGetSCCurrent( int nDeviceHnd, double *dOut1, double *dOut2, int nStyle );
+int __stdcall OlxAPIGetSCVoltage( int nDeviceHnd, double *dOut1, double *dOut2, int nStyle );
+int __stdcall OlxAPIGetSteppedEvent( int nStep, double *dTime, double *dCurrent,
    int *nUserEvent, char* szEventDesc, char* szFaultDesc );
-int __stdcall OlrxAPILoadDataFile( char *szFilePath, int bReadOnly );
-int __stdcall OlrxAPIMakeOutageList( int nHandle, int nMxTiers, int nWantedBrType,
-   int *vnList, int *pnListLen );
-int __stdcall OlrxAPINextBusByName( int* pDeviceHnd );
-int __stdcall OlrxAPINextBusByNumber( int* pDeviceHnd );
-int __stdcall OlrxAPIPickFault( int nFltIndex, int nWantedTiers );
-int __stdcall OlrxAPIPostData( int nDeviceHnd );
-const char* __stdcall OlrxAPIPrintObj1LPF( int nHandle );
-int __stdcall OlrxAPIReadChangeFile( char *szPathname );
-int __stdcall OlrxAPIRun1LPFCommand( char *szBuf );
-/* Run OneLiner/PowerFlow command
+
+/** OlxAPILoadDataFile: Read ASPEN OLR data file from disk
+
+    Args:
+        filePath : Full path name of ASPEN OLR file.
+        readonly : open in read-only mode. 1-true; 0-false
+
+    Returns:
+        OLXAPI_FAILURE: Failure
+        OLXAPI_OK     : Success
+        OLXAPI_DATAFILEANOMALIES: File opened with data errors
+
+    Remarks: 
+        The OneLinerï¿½s TTY output during the data file reading operation execution 
+        is atomatically saved in the log file PowerScriptTTYLog.txt in the 
+        Windows %TEMP% folder. When this funtions return value is other than OLXAPI_OK, 
+        you must check the content of this log file for details of data errors and 
+        warnings that were found when reading the file and proceed accordingly.
+*/
+int __stdcall OlxAPILoadDataFile( char *filePath, int readonly );
+
+/** OlxAPIMakeOutageList: Return list of neighboring branches that can be used as outage list 
+            in the DoFault function on a bus, branch or relay group.
+   Parameters:
+      nHandle      [in] Handle number of a bus, relay group or branch.
+      nMaxTiers    [in] Number of tiers (must be positive) 
+      nWantedTypes [in] Branch type. Sum of one or more following values: 1- Line; 
+                   2- 2-winding transformer; 4- Phase shifter; 8- 3-winding transformer; 
+                   16- Switch;
+      vnList       [out] outage list (with zero in the last element).
+      pnListLen    [in] Length of vnList array
+                   [out] Number of outage branches found.
+   Return value: 
+      0               Failure
+      1               Success
+   Remarks: Call this function with NULL in place of vnList to determine the 
+            number of outage branches found within the number of tiers specified.
+*/
+int __stdcall OlxAPIMakeOutageList( int nHandle, int nMxTiers, int nWantedBrType, int *vnList, int *pnListLen );
+
+int __stdcall OlxAPINextBusByName( int* pDeviceHnd );
+int __stdcall OlxAPINextBusByNumber( int* pDeviceHnd );
+int __stdcall OlxAPIPickFault( int nFltIndex, int nWantedTiers );
+int __stdcall OlxAPIPostData( int nDeviceHnd );
+
+/** OlxAPIPrintObj1LPF: Return a formated ID string of the given object.
+   Parameters:
+      nHandle   [in] Object handle
+   Remarks: Use FindObj1LPF() to perform operation in reverse.
+*/
+const char* __stdcall OlxAPIPrintObj1LPF( int nHandle );
+
+/** OlxAPIReadChangeFile: Apply ASPEN .CHF and .ADX change file
+   Parameters:
+      szPathname:  [in] Full path name of the ASPEN change file
+   Returns:
+        OLXAPI_FAILURE: There were errors and/or warnings. See remarks below.
+        OLXAPI_OK     : No error and warning.
+      
+   Remarks: This API call always resets the script engine handle table, 
+      which will invalidate all handles that exist up to this point in the 
+      scrip program execution. For this reason user cannot re-use any of 
+      these handles in subsequence script calculation.
+
+      All error and warnings messges generated during the read change file
+      operation are saved to a text file with the default name 
+      PowerScriptTTYLog.txt in the Windows %TEMP% folder. User should always
+      analyze the content of this file to determine the valididy of the 
+      network model after the read change file operation.
+*/
+int __stdcall OlxAPIReadChangeFile( char *szPathname );
+
+/** OlxAPIRun1LPFCommand: Run OneLiner/PowerFlow command
    szBuf is a XML string, or full path name to XML file, containing a XML node
    - Node name: OneLiner command
    - Node attributes and text: required command parameters
@@ -768,7 +1366,7 @@ int __stdcall OlrxAPIRun1LPFCommand( char *szBuf );
          OUTFILETYPE 	[2] Output file type 1- TXT; 2- CSV
          SELECTEDOBJ	Arcflash bus. Must  have one of following values
                   "PICKED " 	the highlighted bus on the 1-line diagram
-                  "'BNAME1                ,KV1;’BNAME2’,KV2;..."  Bus name and nominal kV.
+                  "'BNAME1                ,KV1;ï¿½BNAME2ï¿½,KV2;..."  Bus name and nominal kV.
          TIERS	[0] Number of tiers around selected object. This attribute is ignored if SELECTEDOBJ is not found.
          AREAS	[0-9999] Comma delimited list of area numbers and ranges to check relaygroups agains backup.
                         This attribute is ignored if SELECTEDOBJ is found.
@@ -909,10 +1507,11 @@ int __stdcall OlrxAPIRun1LPFCommand( char *szBuf );
    Command: CHECKRELAYOPERATIONSEA - Check | Relay operation using stepped-events
    Attributes:
          REPORTPATHNAME	(*) Full pathname of folder for report files.
+         OPTIONSFILEPATH Full pathname of the checking option file.
          REPORTCOMMENT		Additional comment string to include in all checking report files
          SELECTEDOBJ	Check line with selected relaygroup. Must  have one of following values
-         "PICKED " 	the highlighted relaygroup on the 1-line diagram
-         "BNO1;'BNAME1';KV1;BNO2;'BNAME2';KV2;'CKT';BTYP;"  location string of  the relaygroup. Format description is in OneLiner help section 10.2.
+            "PICKED " 	the highlighted relaygroup on the 1-line diagram
+            "BNO1;'BNAME1';KV1;BNO2;'BNAME2';KV2;'CKT';BTYP;"  location string of  the relaygroup. Format description is in OneLiner help section 10.2.
          TIERS	[0] Number of tiers around selected object. This attribute is ignored if SELECTEDOBJ is not found.
          AREAS	[0-9999] Comma delimited list of area numbers and ranges.
          ZONES	[0-9999] Comma delimited list of zone numbers and ranges. This attribute is ignored if AREAS is found.
@@ -928,15 +1527,18 @@ int __stdcall OlrxAPIRun1LPFCommand( char *szBuf );
          OUTAGE1LINE1XFMR	Run double line and transformer outage contingency: 0-False; 1-True. Ignored if OUTAGEMULINES=0 or OUTAGEXFMRS =0
          OUTAGE2XFMRS	Run double and transformer outage contingency: 0-False; 1-True. Ignored if OUTAGEXFMRS =0
          OUTAGE3SOURCES	Outage only  3 strongest sources: 0-False; 1-True. Ignored if OUTAGEMULINES=0 and OUTAGEXFMRS =0
+         OUTAGEPILOT    Simulate pilot outage in N and N-1 cases
 
-   Command: SETGENREFANGLE - Network | Set generator reference angle
+   Command: DIFFANDMERGE - File | Compare and Merge...
    Attributes:
-         REPORTPATHNAME	Full pathname of folder for report files.
-         REFERENCEGEN	Bus name and kV of reference generator in format: 'BNAME', KV.
-         EQUSOURCEOPTION	Option for calculating reference angle of equivalent sources. Must have one of the following values
-         [ROTATE] 	apply delta angle of existing reference gen
-         SKIP   	Leave unchanged. This option will be in effect automatically when old reference is not valid
-         ASGEN  	Use angle computed for regular generator
+         FILEPATHA	    Full pathname of file A. Can be ommited when an OLR file
+                         had been opened.
+         FILEPATHB	(*) Full pathname of file B.
+         FILEPATHBASE	 Full pathname of common base.
+         FILEPATHDIFF	 Full pathname of the ADX file with DIFF result.
+         FILEPATHMERGED  Full pathname of the OLR file with merge result.
+         FILEPATHCFG     Full pathname of the configuration file (see OneLiner User Manual Appendix F.2 
+                         for file formal details).
 
    Command: CHECKRELAYSETTINGS - Check | Relay settings
    Attributes:
@@ -949,6 +1551,7 @@ int __stdcall OlrxAPIRun1LPFCommand( char *szBuf );
       KVS=   Additional KV filter
       TAGS=  Additional tag filter
       REPORTPATHNAME= (*) full valid path to report folder with write access
+      OPTIONSFILEPATH Full pathname of the checking option file.
       REPORTCOMMENT= Report comment string. 255 char or shorter
       FAULTTYPE= 1LG, 3LG. Fault type to check. Space delimited
       DEVICETYPE= OCG, OCP, DSG, DSP, LOGIC, VOLTAGE, DIFF Devide type to check. Space delimited
@@ -1035,13 +1638,53 @@ int __stdcall OlrxAPIRun1LPFCommand( char *szBuf );
          RANGE= Comma delimited list of fault index numbers and ranges(e.g. 1,3,5-10)
                Default: save all faults in the results buffer
 
+   Command: SETGENREFANGLE - Network | Set generator reference angle
+   Attributes:
+         REPORTPATHNAME	Full pathname of folder for report files.
+         REFERENCEGEN	Bus name and kV of reference generator in format: 'BNAME', KV.
+         EQUSOURCEOPTION	Option for calculating reference angle of equivalent sources. Must have one of the following values
+         [ROTATE] 	apply delta angle of existing reference gen
+         SKIP   	Leave unchanged. This option will be in effect automatically when old reference is not valid
+         ASGEN  	Use angle computed for regular generator
+
    Command SIMULATEFAULT - Run OneLiner command FAULTS  | BATCH COMMAND & FAULT SPEC FILE | EXECUTE COMMAND
    Attributes: 
          <FAULT> The <SIMULATEFAULT> XML node must contain one or more children nodes <FAULT>, 
                   one for each fault case to be simulated. 
+                  The <FAULT> node can include XML attributes to specify the various fault 
+                  simulation options:
+                       PREFAULTV: Prefault voltage flag
+                         0 - From linear network solution
+                         1 - Flat 
+                         2 - From load flow
+                       VPF: Flat prefault bus voltage
+                       GENZTYPE: Generator reactance flag
+                         0 - subtransient
+                         1 - transient
+                         2 - synchronous 
+                       IGNORE: a bit field array
+                         bit 1 - ignore load
+                         bit 2 - ignore positive sequence shunt
+                         bit 3 - ignore line G and B
+                         bit 4 - ignore transformer B
+                       GENILIMIT: generator limit option
+                         0 - Ignore
+                         1 - Enforce limit 1
+                         2 - Enforce limit 2
+                       VCCS: Simulate VCCS flag 1-true; 0-false
+                       MOV: MOV protected series capacitor iterative 
+                            solution flag 1-true; 0-false
+                       MOVITERF: MOV protected series capacitor iterative 
+                                   solution acceleration factor
+                       MINZMUPAIR: Ignore mutual coupling threshold
+                       MVASTYLE: Fault MVA calculatin method
+                       GENW3: Simulate type-3 wind generator flag 1-true; 0-false
+                       GENW4: Simulate CIR flag 1-true; 0-false
+                       FLTOPTSTR: a space delimited string with all the fault otion fields in the order listed above 
+                              PREFAULTV VPF GENZTYPE IGNORE GENILIMIT VCCS MOV MOVITERF MINZMUPAIR MVASTYLE GENW3 GENW4
          <FLTSPEC>  Each of the <FAULT> nodes can include up to 40 fault specifications to be 
                   simulated in the case. Fault specification string in the format described in 
-                  OneLiner’s user manual APPENDIX I:  FAULT SPECIFICATION FILE 
+                  OneLinerï¿½s user manual APPENDIX I:  FAULT SPECIFICATION FILE 
                   must be included as the text of children nodes <FLTSPEC>. 
          FLTSPCVS= Alternatively, a tab-delimited list of all the fault spec strings can be entered as 
                   the attribute "FLTSPCVS" in the <FAULT> node. 
@@ -1052,102 +1695,173 @@ int __stdcall OlrxAPIRun1LPFCommand( char *szBuf );
    Remark:
          When NOfault is not the value you expected, call OlxAPIErrorString() for details of simulation error
 
+   Command SNAPSPC: Run OneLiner command Diagram | Snap to state plane coordinates
+      Attributes:
+         CENTERX - Screen center X in SPC
+         CENTERY - Screen center Y in SPC
+         SCALE   - Scaling factor
+         OPTIONS - Bit array options
+                   Bit 1: Auto scale (compute center X, Y from
+                          SPC of all objects in the network)
+                   Bit 2: Place all hidden buses using SPC
+                   Bit 3: Reset all existing graphic before rebuilding 
+                          the 1-line using SPC
+   Returns:
+         OLXAPI_FAILURE: Failure
+         NOmoves       : Total number of buses placed/moved
 */
-int __stdcall OlrxAPISaveDataFile( char *szFilePath );
-int __stdcall OlrxAPISetData( int nDeviceHnd, int nParam, void *pVal );
-const char* __stdcall OlrxAPISetObjMemo( int nDeviceHnd, char *szT );
-const char* __stdcall OlrxAPISetObjTags( int nDeviceHnd, char *szT );
-int __stdcall OlrxAPIVersionInfo( char *szBuf );
-
-// API functions declarations;
-int __stdcall OlxAPIBoundaryEquivalent( char *szEquFileName, int *nBusList, double *dFltOpt );
-int __stdcall OlxAPIComputeRelayTime( int nRelayHnd,
-   double *dCurMag, double *dCurAng,   // 3 phases plus two neutral currents
-   double *dVMag, double *dVAng,       // 3 phases voltages
-   double dVpreMag, double dVpreAng,
-   double *pTime, char *szDevice );
-int __stdcall OlxAPIDeleteEquipment( int nDeviceHnd );
-int __stdcall OlxAPIDoBreakerRating(
-   int* nScope,         //[1]: 0-IEEE;1-IEC
-                        //[2]: 0-All;1-Area;2-Zone;3-Selected
-                        //[3]: Area or zone number
-                        //...: or list of bus hnd terminated with -1
-   double dThreshold,   // Rating threshold
-   double dOutputOpt,   // 0.0- all; 1.0-Overduty only; else- screening threshold
-   int nOptionalReport, // Bit1-Detailed sim result; Bit2-Name plate data; 
-                        // Bit3-Conn equipment list
-   char* szReportTXT,
-   char* szReportCSV,
-   char* szConfigFile );
-int __stdcall OlxAPIDoFault( int nDevHnd, int *nFltConn,
-   double *dFltOpt, int *nOutageOpt, int *nOutageLst,
-   double dFltR, double dFltX, int nFlag );
-int __stdcall OlxAPIDoSteppedEvent( int nDevHnd, double *dFltOpt, int *nDevOpt, long nTiers );
-int __stdcall OlxAPIEquipmentType( int nDevHnd );
-const char* __stdcall OlxAPIErrorString();
-
-const char* __stdcall OlxAPIFaultDescriptionEx( 
-   // Return description string of a fault in the simulation results buffer.
-   int nFltIdx,      // Index number of fault case.
-   int nOpt );       // Output flag:
-                     // [0] Fault description string only
-                     // 1   Plus FLTSPCVS on the last line
-                     // 2   Plus FLTOPTSTR on the last line
-                     //     See SIMULATEFAULT for details of FLTSPCVS and FLTOPTSTR 
-
-const char* __stdcall OlxAPIFaultDescription( int nFltIdx );
-int __stdcall OlxAPIFindBusByName( const char* pszBusName, double dKV, int* pDeviceHnd );
-int __stdcall OlxAPIFindBusByName( const char* pszBusName, double dKV, int* pDeviceHnd );
-int __stdcall OlxAPIFindBusNo( int nBusNo );
-int __stdcall OlxAPIFindEquipmentByTag( char *szTags, int nDevType, int *pnHnd );
-const char* __stdcall OlxAPIFullBranchName( int nBranchHnd );
-const char* __stdcall OlxAPIFullBusName( int nBusHnd );
-const char* __stdcall OlxAPIFullRelayName( int nRelayHnd );
-int __stdcall OlxAPIGetBusEquipment( int nBusHnd, int nType, int* pDeviceHnd );
-int __stdcall OlxAPIGetData( int nDeviceHnd, int nParam, void *pOutput );
-int __stdcall OlxAPIGetEquipment( int nType, int *pDeviceHnd );
-int __stdcall OlxAPIGetLogicScheme( int nRlyGrHnd, long * pSchemeHnd );
-int __stdcall OlxAPIGetRelay( int nRlyGrHnd, int *pRelayHnd );
-const char* __stdcall OlxAPIGetObjJournalRecord( int nDeviceHnd );
-const char* __stdcall OlxAPIGetObjMemo( int nDeviceHnd );
-const char* __stdcall OlxAPIGetObjTags( int nDeviceHnd );
-const char* __stdcall OlxAPIGetOlrFileName();
-int __stdcall OlxAPIGetPSCVoltage( int nDeviceHnd, double *dOut1, double *dOut2, int nStyle );
-int __stdcall OlxAPIGetRelayTime( int nRelayHnd, double dFactor, double *pTime, char* szDevice, int nTripOnly );
-int __stdcall OlxAPIGetSCCurrent( int nDeviceHnd, double *dOut1, double *dOut2, int nStyle );
-int __stdcall OlxAPIGetSCVoltage( int nDeviceHnd, double *dOut1, double *dOut2, int nStyle );
-int __stdcall OlxAPIGetSteppedEvent( int nStep, double *dTime, double *dCurrent,
-   int *nUserEvent, char* szEventDesc, char* szFaultDesc );
-int __stdcall OlxAPILoadDataFile( char *szFilePath, int bReadOnly );
-int __stdcall OlxAPIMakeOutageList( int nHandle, int nMxTiers, int nWantedBrType, int *vnList, int *pnListLen );
-/* Purpose: Return list of neighboring branches that can be used as outage list 
-            in the DoFault function on a bus, branch or relay group.
-   Parameters:
-      nHandle      [in] Handle number of a bus, relay group or branch.
-      nMaxTiers    [in] Number of tiers (must be positive) 
-      nWantedTypes [in] Branch type. Sum of one or more following values: 1- Line; 
-                   2- 2-winding transformer; 4- Phase shifter; 8- 3-winding transformer; 
-                   16- Switch;
-      vnList       [out] outage list (with zero in the last element).
-      pnListLen    [in] Length of vnList array
-                   [out] Number of outage branches found.
-   Return value: 
-      0               Failure
-      1               Success
-   Remarks: Call this function with NULL in place of vnList to determine the 
-            number of outage branches found within the number of tiers specified.
-*/
-int __stdcall OlxAPINextBusByName( int* pDeviceHnd );
-int __stdcall OlxAPINextBusByNumber( int* pDeviceHnd );
-int __stdcall OlxAPIPickFault( int nFltIndex, int nWantedTiers );
-int __stdcall OlxAPIPostData( int nDeviceHnd );
-const char* __stdcall OlxAPIPrintObj1LPF( int nHandle );
-int __stdcall OlxAPIReadChangeFile( char *szPathname );
 int __stdcall OlxAPIRun1LPFCommand( char *szBuf );
+
+/** OlxAPIGetObjGUID: Retrieve GUID string of the given object.
+   Parameters:
+      nHandle   [in] Object handle
+   Returns: GUID string or error message
+   Remarks: None
+*/
+const char* __stdcall OlxAPIGetObjGUID( int nHandle );
+
+/** OlxAPIGetAreaName: Retrieve name of the given area number
+   Parameters:
+      nNo   [in] Area number
+   Returns: Area name or error message
+   Remarks: None
+*/
+const char* __stdcall OlxAPIGetAreaName( int nNo );
+
+/** OlxAPIGetZoneName: Retrieve name of the given zone number
+   Parameters:
+      nNo   [in] Zone number
+   Returns: Zone name or error message
+   Remarks: None
+*/
+const char* __stdcall OlxAPIGetZoneName( int nNo );
+
+/** OlxAPISetData: Set the value of an object data field.
+   Parameters:
+      nHandle   [in] Object handle
+      token     [in] Parameter token
+      pBuf      [in] Pointer to the buffer with the field data (see remark below)
+   Returns:
+      OLXAPI_OK     : Success
+      OLXAPI_FAILURE: Failure
+   Remarks: pBuf data are decoded in this function based on the token value as follows:
+      100 <= token < 200: BSTR* in OlxAPISetData(); char* in OlxAPISetDataEx()
+      200 <= token < 300: double*
+      300 <= token < 400: long*
+      500 <= 500 < 600: double[MXSETDATABUFDOUBLE]
+*/
+int __stdcall OlxAPISetData( int nHandle, int token, void *pBuf );
+int __stdcall OlxAPISetDataEx( int nHandle, int token, void *pBuf );
+
 int __stdcall OlxAPISaveDataFile( char *szFilePath );
-int __stdcall OlxAPISetData( int nDeviceHnd, int nParam, void *pVal );
-const char* __stdcall OlxAPISetObjMemo( int nDeviceHnd, char *szT );
-const char* __stdcall OlxAPISetObjTags( int nDeviceHnd, char *szT );
+int __stdcall OlxAPISetObjMemo( int nDeviceHnd, char *szT );
+int __stdcall OlxAPISetObjTags( int nDeviceHnd, char *szT );
 int __stdcall OlxAPIVersionInfo( char *szBuf );
 
-#define pszPSTTYLogFileName "PowerScriptTTYLog.txt"
+/** OlxAPIGetObjUDF: Retrieve the value of a user-defined field.
+   Parameters:
+      nHandle   [in] Object handle
+      szFName   [in] Field name
+      szFValue  [out] Buffer for field value. Must be MXUDF long
+   Returns:
+      OLXAPI_OK     : Success
+      OLXAPI_FAILURE: Object does not have UDF Field with the given name
+   Remarks: None
+*/
+int __stdcall OlxAPIGetObjUDF( int nHandle, const char *szFName, char *szFValue );
+
+/** OlxAPISetObjUDF: Set the value of a user-defined field.
+   Parameters:
+      nHandle   [in] Object handle
+      szFName   [in] Field name
+      szFValue  [in] Field value
+   Returns:
+      OLXAPI_OK     : Success
+      OLXAPI_FAILURE: Object does not have UDF Field with the given name
+   Remarks: None
+*/
+int __stdcall OlxAPISetObjUDF( int nHandle, const char *szFName, const char *szFValue );
+
+/** OlxAPIGetObjUDFByIndex: Retrieve user-defined field of an object.
+   Parameters:
+      nHandle   [in] Object handle
+      nFIdx     [in] Field index number (zero based)
+      szFName   [out] Buffer for field name. Must be MXUDFNAME long. Set to NULL if not needed. 
+      szFValue  [out] Buffer for field value. Must be MXUDF long. Set to NULL if not needed.
+   Returns:
+      OLXAPI_OK     : Success
+      OLXAPI_FAILURE: Field with the given index does not exist
+   Remarks: None
+*/
+int __stdcall OlxAPIGetObjUDFByIndex( int nHandle, int nFIdx, char *szFName, char *szFValue );
+
+/** OlxAPIEliminateZZBranch: Eliminate switch and zmall impeance line and merge two end bues
+      if the switch is closed
+   Parameters:
+      nHandle   [in] Switch or line handle
+      nOption   [in] Bit 1: Repeat for all connected switches and lines
+                     Bit 2: Output list of retained bus handles (-1 terminated)
+                     Bit 3: Output list of eliminated bus handles (-1 terminated)
+                     Bit 4: Also eliminate small impedance lines
+      pOutBuf   [out] Buffer for outputs. Can be NULL.
+   Returns:
+      OLXAPI_OK     : Success
+      OLXAPI_FAILURE: Failure
+   Remarks: None
+
+*/
+int __stdcall OlxAPIEliminateZZBranch( int nHnd, int nOption, void *pOutBuf );
+
+/** OlxAPIMoveGraphicObj: Move 1-line graphics objects
+   Parameters:
+      nDx        [in] Delta X
+      nDy        [in] Delta Y
+      pObjHndLst [in] List of object handles. Zero terminated
+   Returns:
+      OLXAPI_OK     : Success
+      OLXAPI_FAILURE: Failure
+   Remarks: None
+
+*/
+int __stdcall OlxAPIMoveGraphicObj( int nDx, int nDy, int *pObjList );
+
+/** OlxAPISetObjGraphicData: Set object graphic data.
+
+    Args:
+        hnd: object handle
+        buf: input buffer for graphic data. Must be 500 or longer
+
+    Returns:
+        OLXAPI_FAILURE: Failure
+        Size          : Success, size of graphic data record placed in the buffer
+
+    Remarks: Object graphic data record structure
+        TC_BUS: size,angle,x,y,nameX,nameY,hideID
+                !!! when size is Zero, the bus had never been placed on the 1-line and
+                      therefore the rest of the data are just junk
+                    when size is negative, the bus is not displayed on the 1-line (hidden)
+        TC_GEN, TC_GENW3, TC_GENW4, TC_CCGEN, TC_LOAD, TC_SHUNT, TC_SVD:
+                x|y,angle,textX,textY
+        TC_XFMR, TC_PS, TC_SCAP, TC_SWITCH, TC_DCLINE2:
+                noSegs,p1X,p1Y,p2X,p2Y,p3X,p3Y,p4X,p4Y,text1X,text1Y,text2X,text2Y
+                !!! noSegs determines if p3 and p4 are being used
+        TC_XFMR3: noSegs,p1X,p1Y,p2X,p2Y,p3X,p3Y,p4X,p4Y,p5X,p5Y,p6X,p6Y,
+                  text1X,text1Y,text2X,text2Y,text3X,text3Y
+                !!! noSegs determines if p3 and p4 are being used
+        TC_LINE, TC_SCAP: noSegs,p1X,p2X....,text1X,text1Y,text2X,text2Y
+        TC_SYS: windowCenterX, windowCenterY, fontSizeMainWindow, fontSizeOCWindow, fontSizeDSWindow,
+                xfmrStyle, colorkV1,....,colorkV13,colorIndex1,..., colorIndex13
+*/
+int __stdcall OlxAPISetObjGraphicData(int nHandle, int* buf);
+
+/** OlxAPIGfxOp: Various 1-line graphic operations
+   Parameters:
+      nCmd       [in] Command code
+      vnInput    [in] Input data buffer
+      vnOutput   [out] Output data buffer
+   Returns:
+      OLXAPI_OK     : Success
+      OLXAPI_FAILURE: Failure
+   Remarks: None
+*/
+int __stdcall OlxAPIGfxOp( int nCmd, int *vnInput, int *vnOutput );
